@@ -9,16 +9,21 @@
 import UIKit
 import MSAL
 
-let kIssuer = "https://login.microsoftonline.com/brandwedir.onmicrosoft.com/v2.0"
-let kClientID = "2a814505-ab4a-41f7-bd09-3fc614ac077c"
-let kRedirectURI = "msal://com.xerners/"
-let kLogoutURI = "https://login.microsoftonline.com/common/oauth2/v2.0/logout"
-let kGraphURI = "https://graph.microsoft.com/v1.0/me/"
-let kScopes: [String] = ["https://graph.microsoft.com/user.read"]
-let kAuthority = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+
 
 
 class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
+    
+    let kTenantName = "fabrikamb2c.onmicrosoft.com"
+    let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6"
+    let kRedirectURI = "x-msauth-com-microsoft-identity-client-sample-MSALiOSB2C://"
+    let kSignupOrSigninPolicy = "b2c_1_susi"
+    let kEditProfilePolicy = "b2c_1_edit_profile"
+    let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello"
+    let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/demoapi/demo.read"]
+
+    // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C
+    let kEndpoint = "login.microsoftonline.com/te/"
     
     var msalResult =  MSALResult.init()
     
@@ -28,8 +33,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     @IBAction func authorizationButton(_ sender: UIButton) {
         
+        let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "authorize"
+        let tokenEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "token"
         
-        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority) {
+        
+        
+        
+        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: authorizationEndpointConstrution) {
             
             application.acquireToken(forScopes: kScopes) { (result, error) in
                 DispatchQueue.main.async {
@@ -52,7 +62,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    @IBAction func callGraphApi(_ sender: UIButton) {
+    @IBAction func editProfile(_ sender: UIButton) {
+        
+        let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kEditProfilePolicy + "/oauth2/v2.0/" + "authorize"
         
         let sessionConfig = URLSessionConfiguration.default
         let url = URL(string: kGraphURI)
@@ -76,7 +88,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     @IBAction func signoutButton(_ sender: UIButton) {
         
-        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority) {
+         let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "authorize"
+        
+        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: authorizationEndpointConstrution) {
             
             DispatchQueue.main.async {
                 do {
@@ -101,6 +115,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        if self.msalResult.accessToken == nil {
+            
+            signoutButton.isEnabled = false;
+            callGraphApiButton.isEnabled = false;
+            
+            
+        }
     }
 
 
