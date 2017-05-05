@@ -109,41 +109,39 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     @IBAction func callApi(_ sender: UIButton) {
         
-        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
-        
         do {
             
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
-            application.acquireToken(forScopes: kScopes) { (result, error) in
+            let sessionConfig = URLSessionConfiguration.default
+            let url = URL(string: self.kGraphURI)
+            var request = URLRequest(url: url!)
+            request.setValue("Bearer \(msalResult.accessToken!)", forHTTPHeaderField: "Authorization")
+            let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+            
+            urlSession.dataTask(with: request) { data, response, error in
                 
-                if result != nil {
-                    let sessionConfig = URLSessionConfiguration.default
-                    let url = URL(string: self.kGraphURI)
-                    var request = URLRequest(url: url!)
-                    request.setValue("Bearer \(result!.accessToken)", forHTTPHeaderField: "Authorization")
-                    let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+                if (error == nil) {
                     
-                    urlSession.dataTask(with: request) { data, response, error in
-                        
-                        let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                        DispatchQueue.main.async {
-                            if result != nil {
-                                
-                                self.loggingText.text = result.debugDescription
-                                
-                                
-                            }
+                    let result = try? JSONSerialization.jsonObject(with: data!, options: [])
+                    DispatchQueue.main.async {
+                        if result != nil {
+                            
+                            self.loggingText.text = result.debugDescription
+                            
+                            
                         }
-                        }.resume() }
+                        else {
+                            self.loggingText.text = "Nothing returned from API"
+                        }
+                    } }
                 else {
-                    self.loggingText.text = "Could not call API: \(error?.localizedDescription ?? "No Error provided")"
-                    
+                    self.loggingText.text = "Got error: \(error?.localizedDescription ?? "No description")"
                 }
-            }
+                }.resume()
+            
         }
         catch {
-            self.loggingText.text = "Unable to create application: \(error)"
+            self.loggingText.text = "Unable to call API: \(error)"
         }
         
     }
@@ -159,6 +157,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             try application.remove(self.msalResult.user)
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
+            self.editProfileButton.isEnabled = false;
             
         }
         catch  {
