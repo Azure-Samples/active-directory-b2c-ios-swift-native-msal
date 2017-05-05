@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		FB2510581EBBE8030044F3F7 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB2510571EBBE8030044F3F7 /* MSAL.framework */; };
-		FB7368E81EBA87AC00FB407E /* AzureSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = FB7368E71EBA87AC00FB407E /* AzureSettings.plist */; };
 		FB7630D11EB7EF8700D2A969 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7630D01EB7EF8700D2A969 /* AppDelegate.swift */; };
 		FB7630D31EB7EF8700D2A969 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7630D21EB7EF8700D2A969 /* ViewController.swift */; };
 		FB7630D61EB7EF8700D2A969 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB7630D41EB7EF8700D2A969 /* Main.storyboard */; };
@@ -36,7 +35,6 @@
 /* Begin PBXFileReference section */
 		FB2510571EBBE8030044F3F7 /* MSAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MSAL.framework; path = Carthage/Build/iOS/MSAL.framework; sourceTree = "<group>"; };
 		FB7368BE1EB94C8100FB407E /* MSALiOSB2C.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = MSALiOSB2C.xcodeproj; sourceTree = "<group>"; };
-		FB7368E71EBA87AC00FB407E /* AzureSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = AzureSettings.plist; sourceTree = "<group>"; };
 		FB7630CD1EB7EF8700D2A969 /* MSALiOSB2C.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALiOSB2C.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB7630D01EB7EF8700D2A969 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FB7630D21EB7EF8700D2A969 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -105,7 +103,6 @@
 				FB7630D71EB7EF8700D2A969 /* Assets.xcassets */,
 				FB7630D91EB7EF8700D2A969 /* LaunchScreen.storyboard */,
 				FB7630DC1EB7EF8700D2A969 /* Info.plist */,
-				FB7368E71EBA87AC00FB407E /* AzureSettings.plist */,
 			);
 			path = MSALiOSB2C;
 			sourceTree = "<group>";
@@ -235,7 +232,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB7630DB1EB7EF8700D2A969 /* LaunchScreen.storyboard in Resources */,
-				FB7368E81EBA87AC00FB407E /* AzureSettings.plist in Resources */,
 				FB7630D81EB7EF8700D2A969 /* Assets.xcassets in Resources */,
 				FB7630D61EB7EF8700D2A969 /* Main.storyboard in Resources */,
 			);
