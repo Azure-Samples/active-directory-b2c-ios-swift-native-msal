@@ -73,6 +73,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FB25105E1EBCF9320044F3F7 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FB7630C41EB7EF8700D2A969 = {
 			isa = PBXGroup;
 			children = (
@@ -217,6 +222,12 @@
 			mainGroup = FB7630C41EB7EF8700D2A969;
 			productRefGroup = FB7630CE1EB7EF8700D2A969 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FB25105E1EBCF9320044F3F7 /* Products */;
+					ProjectRef = FB7368BE1EB94C8100FB407E /* MSALiOSB2C.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FB7630CC1EB7EF8700D2A969 /* MSALiOSB2C */,
