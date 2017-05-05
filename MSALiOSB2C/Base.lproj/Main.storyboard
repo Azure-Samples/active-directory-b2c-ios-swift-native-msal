@@ -35,16 +35,8 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XaC-y8-Foz">
-                                <rect key="frame" x="154" y="132" width="66" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Authorize"/>
-                                <connections>
-                                    <action selector="authorizationButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="i1M-yy-3JY"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lt4-0b-iSj">
-                                <rect key="frame" x="163" y="279" width="48" height="30"/>
+                                <rect key="frame" x="161" y="318" width="48" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Logout"/>
                                 <connections>
@@ -52,14 +44,14 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Logging" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X9r-XE-kne">
-                                <rect key="frame" x="29" y="323" width="62" height="21"/>
+                                <rect key="frame" x="23" y="356" width="62" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JQa-oI-jar">
-                                <rect key="frame" x="16" y="358" width="343" height="284"/>
+                                <rect key="frame" x="16" y="393" width="343" height="249"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -74,11 +66,27 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PHD-hH-PW9">
-                                <rect key="frame" x="161" y="227" width="53" height="30"/>
+                                <rect key="frame" x="159" y="270" width="53" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Call API"/>
                                 <connections>
                                     <action selector="callApi:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4VR-5A-u4F"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GAR-kV-sCk">
+                                <rect key="frame" x="136" y="224" width="98" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Refresh Token"/>
+                                <connections>
+                                    <action selector="refreshToken:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qEg-Ec-xSO"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XaC-y8-Foz">
+                                <rect key="frame" x="154" y="132" width="66" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Authorize"/>
+                                <connections>
+                                    <action selector="authorizationButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="i1M-yy-3JY"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -88,6 +96,7 @@
                         <outlet property="callGraphApiButton" destination="PHD-hH-PW9" id="twe-nG-C95"/>
                         <outlet property="editProfileButton" destination="Q6x-OQ-o55" id="Gcb-wr-pxF"/>
                         <outlet property="loggingText" destination="JQa-oI-jar" id="pZy-r0-TiR"/>
+                        <outlet property="refreshTokenButton" destination="GAR-kV-sCk" id="Tgl-9X-PkB"/>
                         <outlet property="signoutButton" destination="Lt4-0b-iSj" id="Di3-h9-7hW"/>
                     </connections>
                 </viewController>

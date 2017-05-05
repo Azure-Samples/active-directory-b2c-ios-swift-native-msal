@@ -46,7 +46,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     @IBOutlet weak var signoutButton: UIButton!
     @IBOutlet weak var callGraphApiButton: UIButton!
     @IBOutlet weak var editProfileButton: UIButton!
-    
+    @IBOutlet weak var refreshTokenButton: UIButton!
     @IBAction func authorizationButton(_ sender: UIButton) {
         
         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
@@ -71,6 +71,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
                         self.editProfileButton.isEnabled = true;
+                        self.refreshTokenButton.isEnabled = true;
                         
                         
                     } else {
@@ -122,6 +123,44 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
 
+    @IBAction func refreshToken(_ sender: UIButton) {
+        
+                let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
+        
+        do {
+            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            
+            /*!
+             Acquire a token for a new user using interactive authentication
+             
+             @param  kScopes Permissions you want included in the access token received
+             in the result in the completionBlock. Not all scopes are
+             gauranteed to be included in the access token returned.
+             @param  completionBlock The completion block that will be called when the authentication
+             flow completes, or encounters an error.
+             */
+            application.acquireTokenSilent(forScopes: kScopes, user: msalResult.user) { (result, error) in
+                DispatchQueue.main.async {
+                    if result != nil {
+                        self.msalResult = result!
+                        self.loggingText.text = "Refreshing token silently"
+                        self.loggingText.text = "Refreshed Access token is \(self.msalResult.accessToken!)"
+                        
+                        
+                    } else {
+                        self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
+                    }
+                }
+            }
+        }
+            
+        catch {
+            self.loggingText.text = "Unable to create application \(error)"
+            
+        }
+        
+
+    }
     
     @IBAction func callApi(_ sender: UIButton) {
             
@@ -160,6 +199,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
             self.editProfileButton.isEnabled = false;
+            self.refreshTokenButton.isEnabled = false;
             
         }
         catch  {
@@ -185,6 +225,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
             editProfileButton.isEnabled = false;
+            refreshTokenButton.isEnabled = false;
             
             
         }
