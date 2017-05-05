@@ -44,7 +44,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lt4-0b-iSj">
-                                <rect key="frame" x="163" y="254" width="48" height="30"/>
+                                <rect key="frame" x="163" y="279" width="48" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Logout"/>
                                 <connections>
@@ -62,24 +62,31 @@
                                 <rect key="frame" x="16" y="358" width="343" height="284"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q6x-OQ-o55">
-                                <rect key="frame" x="154" y="192" width="75" height="30"/>
+                                <rect key="frame" x="150" y="180" width="75" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Edit Profile"/>
                                 <connections>
-                                    <action selector="callGraphApi:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fju-mG-BLY"/>
-                                    <action selector="editProfile:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wa5-Lk-LVJ"/>
+                                    <action selector="editProfile:" destination="BYZ-38-t0r" eventType="touchUpInside" id="n5H-l7-6xE"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PHD-hH-PW9">
+                                <rect key="frame" x="161" y="227" width="53" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Call API"/>
+                                <connections>
+                                    <action selector="callApi:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4VR-5A-u4F"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
-                        <outlet property="callGraphApiButton" destination="Q6x-OQ-o55" id="tjE-dd-YaD"/>
+                        <outlet property="callGraphApiButton" destination="PHD-hH-PW9" id="twe-nG-C95"/>
+                        <outlet property="editProfileButton" destination="Q6x-OQ-o55" id="Gcb-wr-pxF"/>
                         <outlet property="loggingText" destination="JQa-oI-jar" id="pZy-r0-TiR"/>
                         <outlet property="signoutButton" destination="Lt4-0b-iSj" id="Di3-h9-7hW"/>
                     </connections>

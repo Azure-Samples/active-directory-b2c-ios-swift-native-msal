@@ -16,7 +16,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     let kTenantName = "fabrikamb2c.onmicrosoft.com"
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6"
-    let kRedirectURI = "x-msauth-com-microsoft-identity-client-sample-MSALiOSB2C://"
     let kSignupOrSigninPolicy = "b2c_1_susi"
     let kEditProfilePolicy = "b2c_1_edit_profile"
     let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello"
@@ -30,12 +29,11 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
     @IBOutlet weak var callGraphApiButton: UIButton!
+    @IBOutlet weak var editProfileButton: UIButton!
     
     @IBAction func authorizationButton(_ sender: UIButton) {
         
         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
-        
-        
         
         do {
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
@@ -56,7 +54,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
-                        //  self.silentRefreshButton.isEnabled = true;
+                        self.editProfileButton.isEnabled = true;
                         
                         
                     } else {
@@ -75,7 +73,46 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
         let kAuthority = String(format: kEndpoint, kTenantName, kEditProfilePolicy)
         
+        
+        
         do {
+            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            
+            /*!
+             Acquire a token for a user using interactive authentication, but this time with a new policy for editing the profile. 
+             This token we won't save as it's not needed for any work.
+             
+             @param  kScopes Permissions you want included in the access token received
+             in the result in the completionBlock. Not all scopes are
+             gauranteed to be included in the access token returned.
+             @param  completionBlock The completion block that will be called when the authentication
+             flow completes, or encounters an error.
+             */
+            application.acquireToken(forScopes: kScopes) { (result, error) in
+                DispatchQueue.main.async {
+                    if result != nil {
+                        self.loggingText.text = "Successfully edited profile"
+                        
+                        
+                    } else {
+                        self.loggingText.text = "Could not edit profile: \(error?.localizedDescription ?? "No Error provided")"
+                    }
+                }
+            }
+        }
+            
+        catch {
+            self.loggingText.text = "Unable to create application \(error)"
+        }
+    }
+
+    
+    @IBAction func callApi(_ sender: UIButton) {
+        
+        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
+        
+        do {
+            
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             application.acquireToken(forScopes: kScopes) { (result, error) in
@@ -100,7 +137,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         }
                         }.resume() }
                 else {
-                    self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
+                    self.loggingText.text = "Could not call API: \(error?.localizedDescription ?? "No Error provided")"
                     
                 }
             }
@@ -146,6 +183,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
+            editProfileButton.isEnabled = false;
             
             
         }
