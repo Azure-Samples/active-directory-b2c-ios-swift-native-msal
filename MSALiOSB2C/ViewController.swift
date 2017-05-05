@@ -23,7 +23,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/demoapi/demo.read"]
 
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C
-    let kEndpoint = "login.microsoftonline.com/te/"
+    let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
     var msalResult =  MSALResult.init()
     
@@ -33,14 +33,22 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     @IBAction func authorizationButton(_ sender: UIButton) {
         
-        let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "authorize"
-        let tokenEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "token"
+        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
         
         
-        
-        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: authorizationEndpointConstrution) {
+        do {
+            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
+            /*!
+             Acquire a token for a new user using interactive authentication
+             
+             @param  kScopes Permissions you want included in the access token received
+             in the result in the completionBlock. Not all scopes are
+             gauranteed to be included in the access token returned.
+             @param  completionBlock The completion block that will be called when the authentication
+             flow completes, or encounters an error.
+             */
             application.acquireToken(forScopes: kScopes) { (result, error) in
                 DispatchQueue.main.async {
                     if result != nil {
@@ -48,62 +56,77 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
+                        //  self.silentRefreshButton.isEnabled = true;
                         
                         
                     } else {
-                        self.loggingText.text = "Could not create Public Client instance: \(error?.localizedDescription ?? "No Error provided")"
+                        self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
                     }
                 }
             }
         }
             
-        else {
-            self.loggingText.text = "Unable to create application."
+        catch {
+            self.loggingText.text = "Unable to create application \(error)"
         }
     }
     
     @IBAction func editProfile(_ sender: UIButton) {
         
-        let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kEditProfilePolicy + "/oauth2/v2.0/" + "authorize"
+        let kAuthority = String(format: kEndpoint, kTenantName, kEditProfilePolicy)
         
-        let sessionConfig = URLSessionConfiguration.default
-        let url = URL(string: kGraphURI)
-        var request = URLRequest(url: url!)
-        request.setValue("Bearer \(msalResult.accessToken!)", forHTTPHeaderField: "Authorization")
-        let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
-        
-        urlSession.dataTask(with: request) { data, response, error in
+        do {
+            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
-            let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-            DispatchQueue.main.async {
+            application.acquireToken(forScopes: kScopes) { (result, error) in
+                
                 if result != nil {
+                    let sessionConfig = URLSessionConfiguration.default
+                    let url = URL(string: self.kGraphURI)
+                    var request = URLRequest(url: url!)
+                    request.setValue("Bearer \(result!.accessToken)", forHTTPHeaderField: "Authorization")
+                    let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
                     
-                    self.loggingText.text = result.debugDescription
-                    
+                    urlSession.dataTask(with: request) { data, response, error in
+                        
+                        let result = try? JSONSerialization.jsonObject(with: data!, options: [])
+                        DispatchQueue.main.async {
+                            if result != nil {
+                                
+                                self.loggingText.text = result.debugDescription
+                                
+                                
+                            }
+                        }
+                        }.resume() }
+                else {
+                    self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
                     
                 }
             }
-            }.resume()
+        }
+        catch {
+            self.loggingText.text = "Unable to create application: \(error)"
+        }
+        
     }
     
     @IBAction func signoutButton(_ sender: UIButton) {
         
-         let authorizationEndpointConstrution = "https://" + kEndpoint + "/"  + kTenantName + "/" + kSignupOrSigninPolicy + "/oauth2/v2.0/" + "authorize"
+         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
-        if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: authorizationEndpointConstrution) {
+        do {
+            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
-            DispatchQueue.main.async {
-                do {
-                    try application.remove(self.msalResult.user)
-                    self.signoutButton.isEnabled = false;
-                    self.callGraphApiButton.isEnabled = false;
-                    
-                } catch let error {
-                    self.loggingText.text = "Received error signing user out: \(error.localizedDescription)"
-                }
-            }
+            
+            try application.remove(self.msalResult.user)
+            self.signoutButton.isEnabled = false;
+            self.callGraphApiButton.isEnabled = false;
+            
         }
-        
+        catch  {
+            self.loggingText.text = "Received error signing user out: \(error)"
+        }
     }
 
 
