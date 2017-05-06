@@ -35,7 +35,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        let logger = MSALLogger.init()
+        
+        
+        /** When capturing log messages from MSAL you only need to capture either messages where
+         containsPII == YES or containsPII == NO, as log messages are duplicated between the
+         two, however the containsPII version might contain Personally Identifiable Information (PII)
+         about the user being logged in.
+         */
+        
+        logger.setCallback { (logLevel, message, containsPII) in
+            
+            if (!containsPII) {
+                
+                print("%@", message!)
+                
+            }
+        }
+        
         return true
     }
 

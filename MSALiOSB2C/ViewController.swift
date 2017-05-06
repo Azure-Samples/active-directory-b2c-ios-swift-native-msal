@@ -102,7 +102,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             application.acquireToken(forScopes: kScopes) { (result, error) in
                 DispatchQueue.main.async {
-                    if result != nil {
+                    if  error == nil {
                         self.msalResult = result!
                         self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
                         self.signoutButton.isEnabled = true;
@@ -114,6 +114,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     } else {
                         self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
                     }
+                
                 }
             }
         }
@@ -172,7 +173,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             application.acquireToken(forScopes: kScopes) { (result, error) in
                 DispatchQueue.main.async {
-                    if result != nil {
+                    if error == nil {
                         self.loggingText.text = "Successfully edited profile"
                         
                         
@@ -222,13 +223,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             application.acquireTokenSilent(forScopes: kScopes, user: msalResult.user) { (result, error) in
                 DispatchQueue.main.async {
-                    if result != nil {
+                    if error == nil {
                         self.msalResult = result!
                         self.loggingText.text = "Refreshing token silently"
                         self.loggingText.text = "Refreshed Access token is \(self.msalResult.accessToken!)"
                         
                         
                     } else  {
+                        
                         self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
                     
@@ -255,7 +257,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             urlSession.dataTask(with: request) { data, response, error in
                 
-            
+                if error == nil {
                     let result = try? JSONSerialization.jsonObject(with: data!, options: [])
                     DispatchQueue.main.async {
                         if result != nil {
@@ -265,6 +267,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             self.loggingText.text = "Nothing returned from API"
                         }
                     }
+                } else {
+                    self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+                }
                 }.resume()
         
     }
