@@ -201,6 +201,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          use for the current user flow. The policy we are using here is the `kSignupOrSigninPolicy`
          *as that is the policy we originally acquired the token with*. It is very important that all actions
          against a token acquired by a policy maintains the user of that policy on each call.
+         
+         Note the fact that we also look for InteractionRequired as an error code and
+         prompt the user interactively. Often times the inability to use a refresh token
+         is from either a password change, refersh token expiring, or other event that
+         can be remedied by the user signing in again. This shouldn't be necessary at every
+         AcquireTokenSilent. If you are experiencing that in your application, make
+         sure you are using the cache correctly and using the same authority.
          */
 
         
@@ -229,11 +236,23 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         self.loggingText.text = "Refreshed Access token is \(self.msalResult.accessToken!)"
                         
                         
-                    } else  {
+                    }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
                         
+                        // Notice we supply the user here. This ensures we acquire token for the same user
+                        // as we originally authenticated.
+                        
+                        application.acquireToken(forScopes: self.kScopes, user: self.msalResult.user) { (result, error) in
+                                if error == nil {
+                                    self.msalResult = result!
+                                    self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
+                                    
+                                } else  {
+                                    self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                                }
+                        }
+                    } else {
                         self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
-                    
                 }
             }
         }
