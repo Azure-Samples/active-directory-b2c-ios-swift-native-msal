@@ -7,7 +7,7 @@ author: brandwe
 Microsoft Authentication Library B2C Sample for Apple iOS in Swift
 =====================================
 
-| [Getting Started](https://apps.dev.microsoft.com/portal/register-app)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-objc) | [Docs](https://aka.ms/aaddev) | [Support](README.md#community-help-and-support)
+| [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-get-started)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-objc) | [Docs](https://aka.ms/aadb2c) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
 
 The MSAL preview library for iOS and macOS gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Azure B2C](https://azure.microsoft.com/en-us/services/active-directory-b2c/) using industry standard OAuth2 and OpenID Connect. This sample demonstrates all the normal lifecycles your application should experience, including:
@@ -74,7 +74,7 @@ When archiving your application for submission to the App Store or TestFlight, X
 
 ## Community Help and Support
 
-We use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before. 
+We use Stack Overflow to provide support using [tag MSAL](http://stackoverflow.com/questions/tagged/msal) and [tag azure-ad-b2c](http://stackoverflow.com/questions/tagged/azure-ad-b2c). We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 
 If you find and bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
 
