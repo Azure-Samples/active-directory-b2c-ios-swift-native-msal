@@ -37,6 +37,21 @@ enum SampleError: Error {
     case genericSampleError
 }
 
+extension String {
+    
+    func fromBase64() -> String? {
+        guard let data = Data(base64Encoded: self) else {
+            return nil
+        }
+        
+        return String(data: data, encoding: .utf8)
+    }
+    
+    func toBase64() -> String {
+        return Data(self.utf8).base64EncodedString()
+    }
+}
+
 class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
     
     let kTenantName = "fabrikamb2c.onmicrosoft.com"
@@ -272,7 +287,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
         catch SampleError.userNotFoundForPolicy {
             
-            self.loggingText.text = "Could not find user for the policy"
+            self.loggingText.text = "Policy and User are mismatched."
             
         }
         catch {
@@ -352,7 +367,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - user:    The user to remove from the cache
              */
             
-            try application.remove(self.msalResult.user)
+            let thisUser = try self.getUserByPolicy(withUsers: [self.msalResult.user], forPolicy: kSignupOrSigninPolicy)
+            
+            try application.remove(thisUser)
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
             self.editProfileButton.isEnabled = false;
@@ -388,34 +405,21 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser {
-        
-        var userWithPolicy = MSALUser.init()
-        
+    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
         
         for user in withUsers {
             
-            print(user.userIdentifier().components(separatedBy: ".")[0])
-        
-        if let base64Decoded = NSData(base64Encoded: user.userIdentifier().components(separatedBy: ".")[0], options:   NSData.Base64DecodingOptions(rawValue: 0))
-            .map({ NSString(data: $0 as Data, encoding: String.Encoding.utf8.rawValue) })
-        {
-            if (base64Decoded?.hasSuffix(forPolicy))! {
+            
+            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy)) {
                 
-                userWithPolicy = user
+                return user
                 
             } else {
                 
                 throw SampleError.userNotFoundForPolicy(policy: forPolicy)
             }
-        } else {
-            
-            throw SampleError.errorDecodingUserIdentifier(UserIdentifier: user.userIdentifier())
-            
-            }
-        }
-        
-        return userWithPolicy
+    }
+        return nil
  }
 
 
