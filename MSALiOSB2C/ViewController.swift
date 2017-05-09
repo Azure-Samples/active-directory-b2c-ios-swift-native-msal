@@ -30,6 +30,13 @@ import MSAL
 
 /// 😃 A View Controller that will respond to the events of the Storyboard.
 
+
+enum SampleError: Error {
+    case userNotFoundForPolicy(policy: String)
+    case errorDecodingUserIdentifier(UserIdentifier: String)
+    case genericSampleError
+}
+
 class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
     
     let kTenantName = "fabrikamb2c.onmicrosoft.com"
@@ -214,7 +221,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
         do {
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            
+                  let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
              
@@ -228,7 +236,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
              */
-            application.acquireTokenSilent(forScopes: kScopes, user: msalResult.user) { (result, error) in
+            
+
+            let thisUser = try self.getUserByPolicy(withUsers: [self.msalResult.user], forPolicy: kSignupOrSigninPolicy)
+    
+
+            application.acquireTokenSilent(forScopes: kScopes, user: thisUser ) { (result, error) in
                 DispatchQueue.main.async {
                     if error == nil {
                         self.msalResult = result!
@@ -255,12 +268,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     }
                 }
             }
-        }
+            }
             
+        catch SampleError.userNotFoundForPolicy {
+            
+            self.loggingText.text = "Could not find user for the policy"
+            
+        }
         catch {
             self.loggingText.text = "Unable to create application \(error)"
             
-        }
+            }
         
 
     }
@@ -369,6 +387,36 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
         }
     }
+    
+    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser {
+        
+        var userWithPolicy = MSALUser.init()
+        
+        
+        for user in withUsers {
+            
+            print(user.userIdentifier().components(separatedBy: ".")[0])
+        
+        if let base64Decoded = NSData(base64Encoded: user.userIdentifier().components(separatedBy: ".")[0], options:   NSData.Base64DecodingOptions(rawValue: 0))
+            .map({ NSString(data: $0 as Data, encoding: String.Encoding.utf8.rawValue) })
+        {
+            if (base64Decoded?.hasSuffix(forPolicy))! {
+                
+                userWithPolicy = user
+                
+            } else {
+                
+                throw SampleError.userNotFoundForPolicy(policy: forPolicy)
+            }
+        } else {
+            
+            throw SampleError.errorDecodingUserIdentifier(UserIdentifier: user.userIdentifier())
+            
+            }
+        }
+        
+        return userWithPolicy
+ }
 
 
 }
