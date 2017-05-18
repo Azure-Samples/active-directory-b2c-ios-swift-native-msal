@@ -114,7 +114,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         
                         
                     } else {
-                        self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
+                        self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
             }
         } catch {
@@ -180,7 +180,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         
                         
                     } else {
-                        self.loggingText.text = "Could not edit profile: \(error?.localizedDescription ?? "No Error provided")"
+                        self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
                     }
             }
         } catch {
