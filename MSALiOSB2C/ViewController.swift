@@ -30,19 +30,20 @@ import MSAL
 
 /// 😃 A View Controller that will respond to the events of the Storyboard.
 
+
 class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
     
-    let kTenantName = "fabrikamb2c.onmicrosoft.com"
-    let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6"
-    let kSignupOrSigninPolicy = "b2c_1_susi"
-    let kEditProfilePolicy = "b2c_1_edit_profile"
-    let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello"
-    let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/demoapi/demo.read"]
+    let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
+    let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
+    let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
+    let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
+    let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
+    let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/demoapi/demo.read"] // This is a scope that you've configured your backend API to look for.
 
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
-    var msalResult =  MSALResult.init()
+    var accessToken = String()
     
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
@@ -54,7 +55,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     /**
      This button will invoke the authorization flow and send the policy specified to the B2C server.
      Here we are using the `kSignupOrSignInPolicy` to sign the user in to the app. We will store this 
-     user in the `msalResult` object to use for subsequent calls.
+     accessToken for subsequent calls.
      */
     
     @IBAction func authorizationButton(_ sender: UIButton) {
@@ -100,11 +101,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
              */
+        
+            
             application.acquireToken(forScopes: kScopes) { (result, error) in
-                DispatchQueue.main.async {
                     if  error == nil {
-                        self.msalResult = result!
-                        self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
+                        self.accessToken = (result?.accessToken)!
+                        self.loggingText.text = "Access token is \(self.accessToken)"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
                         self.editProfileButton.isEnabled = true;
@@ -112,14 +114,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         
                         
                     } else {
-                        self.loggingText.text = "Could not acquire token: \(error?.localizedDescription ?? "No Error provided")"
+                        self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
-                
-                }
             }
-        }
-            
-        catch {
+        } catch {
             self.loggingText.text = "Unable to create application \(error)"
         }
     }
@@ -135,13 +133,15 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
          use for the current user flow. The policy we are using here is the `kEditProfilePolicy`
          as the app is going to allow the user to edit their profile.
+         
+         Note that we don't store the accessToken that is returend by the acquireToken call this time.
+         This is because this acquireToken() call is only to invoke a policy of "editing the profile" and is not
+         meant to be used to call any additional APIs. When you call policies beyond your "sign in" policy
+         you should not store the access token as it's of no use to you.
          */
 
-        
         let kAuthority = String(format: kEndpoint, kTenantName, kEditProfilePolicy)
-        
-        
-        
+
         do {
             
             /**
@@ -171,20 +171,19 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
              */
-            application.acquireToken(forScopes: kScopes) { (result, error) in
-                DispatchQueue.main.async {
+            
+            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kEditProfilePolicy)
+            
+            application.acquireToken(forScopes: kScopes, user:thisUser ) { (result, error) in
                     if error == nil {
                         self.loggingText.text = "Successfully edited profile"
                         
                         
                     } else {
-                        self.loggingText.text = "Could not edit profile: \(error?.localizedDescription ?? "No Error provided")"
+                        self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
                     }
-                }
             }
-        }
-            
-        catch {
+        } catch {
             self.loggingText.text = "Unable to create application \(error)"
         }
     }
@@ -202,18 +201,18 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          *as that is the policy we originally acquired the token with*. It is very important that all actions
          against a token acquired by a policy maintains the user of that policy on each call.
          
-         Note the fact that we also look for InteractionRequired as an error code and
+         Note the fact that we also look for `InteractionRequired` as an error code and
          prompt the user interactively. Often times the inability to use a refresh token
          is from either a password change, refersh token expiring, or other event that
          can be remedied by the user signing in again. This shouldn't be necessary at every
-         AcquireTokenSilent. If you are experiencing that in your application, make
+         `AcquireTokenSilent()`. If you are experiencing that in your application, make
          sure you are using the cache correctly and using the same authority.
          */
-
         
         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
         do {
+            
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -228,23 +227,24 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
              */
-            application.acquireTokenSilent(forScopes: kScopes, user: msalResult.user) { (result, error) in
-                DispatchQueue.main.async {
+            
+            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
+    
+            application.acquireTokenSilent(forScopes: kScopes, user: thisUser ) { (result, error) in
                     if error == nil {
-                        self.msalResult = result!
+                        self.accessToken = (result?.accessToken)!
                         self.loggingText.text = "Refreshing token silently"
-                        self.loggingText.text = "Refreshed Access token is \(self.msalResult.accessToken!)"
-                        
+                        self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
                         
                     }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
                         
                         // Notice we supply the user here. This ensures we acquire token for the same user
                         // as we originally authenticated.
                         
-                        application.acquireToken(forScopes: self.kScopes, user: self.msalResult.user) { (result, error) in
+                        application.acquireToken(forScopes: self.kScopes, user: thisUser) { (result, error) in
                                 if error == nil {
-                                    self.msalResult = result!
-                                    self.loggingText.text = "Access token is \(self.msalResult.accessToken!)"
+                                    self.accessToken = (result?.accessToken)!
+                                    self.loggingText.text = "Access token is \(self.accessToken)"
                                     
                                 } else  {
                                     self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
@@ -253,16 +253,11 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     } else {
                         self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
-                }
             }
-        }
-            
-        catch {
+            } catch {
             self.loggingText.text = "Unable to create application \(error)"
             
-        }
-        
-
+            }
     }
     
     @IBAction func callApi(_ sender: UIButton) {
@@ -271,21 +266,18 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             let sessionConfig = URLSessionConfiguration.default
             let url = URL(string: self.kGraphURI)
             var request = URLRequest(url: url!)
-            request.setValue("Bearer \(msalResult.accessToken!)", forHTTPHeaderField: "Authorization")
+            request.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
             let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
             
             urlSession.dataTask(with: request) { data, response, error in
                 
                 if error == nil {
                     let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                    DispatchQueue.main.async {
                         if result != nil {
                             self.loggingText.text = "API response: \(result.debugDescription)"
-                        }
-                        else {
+                        } else {
                             self.loggingText.text = "Nothing returned from API"
                         }
-                    }
                 } else {
                     self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
                 }
@@ -324,8 +316,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              use for the current user flow.
              - error:       The error that occurred creating the application object, if any, if you're
              not interested in the specific error pass in nil.
-             
              */
+            
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -334,14 +326,15 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - user:    The user to remove from the cache
              */
             
-            try application.remove(self.msalResult.user)
+            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
+            
+            try application.remove(thisUser)
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
             self.editProfileButton.isEnabled = false;
             self.refreshTokenButton.isEnabled = false;
             
-        }
-        catch  {
+        } catch  {
             self.loggingText.text = "Received error signing user out: \(error)"
         }
     }
@@ -359,7 +352,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     override func viewWillAppear(_ animated: Bool) {
         
-        if self.msalResult.accessToken == nil {
+        if self.accessToken.isEmpty {
             
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
@@ -369,6 +362,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
         }
     }
+    
+    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
+        
+        for user in withUsers {
+            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy)) {
+                return user
+            }
+    }
+        return nil
+   }
 
 
 }
