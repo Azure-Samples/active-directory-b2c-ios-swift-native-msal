@@ -1,5 +1,5 @@
 --- 
-Services: active-directory
+Services: active-directory-b2c
 platforms: iOS
 author: brandwe
 ---
