@@ -366,7 +366,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
         
         for user in withUsers {
-            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy)) {
+            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased())) {
                 return user
             }
     }
