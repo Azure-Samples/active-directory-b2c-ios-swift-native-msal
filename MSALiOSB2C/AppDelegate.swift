@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let logger = MSALLogger.init()
+        let logger = MSALLogger.shared()
         
         
         /** When capturing log messages from MSAL you only need to capture either messages where
