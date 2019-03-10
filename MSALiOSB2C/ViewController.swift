@@ -141,9 +141,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kEditProfilePolicy)
+            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kEditProfilePolicy)
             
-            application.acquireToken(forScopes: kScopes, user:thisUser ) { (result, error) in
+            application.acquireToken(forScopes: kScopes, account:thisUser ) { (result, error) in
                     if error == nil {
                         self.loggingText.text = "Successfully edited profile"
                         
@@ -182,9 +182,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              sure you are using the cache correctly and using the same authority.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
+            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
+            
+            guard (thisUser != nil) else {
+                return
+            }
     
-            application.acquireTokenSilent(forScopes: kScopes, user: thisUser ) { (result, error) in
+            application.acquireTokenSilent(forScopes: kScopes, account: thisUser! ) { (result, error) in
                     if error == nil {
                         self.accessToken = (result?.accessToken)!
                         self.loggingText.text = "Refreshing token silently"
@@ -195,7 +199,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         // Notice we supply the user here. This ensures we acquire token for the same user
                         // as we originally authenticated.
                         
-                        application.acquireToken(forScopes: self.kScopes, user: thisUser) { (result, error) in
+                        application.acquireToken(forScopes: self.kScopes, account: thisUser!) { (result, error) in
                                 if error == nil {
                                     self.accessToken = (result?.accessToken)!
                                     self.loggingText.text = "Access token is \(self.accessToken)"
@@ -257,7 +261,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              not interested in the specific error pass in nil.
              */
             
-            let kAuthority = self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
+            let kAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -266,9 +270,11 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - user:    The user to remove from the cache
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
+            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
             
-            try application.remove(thisUser)
+            if (thisUser != nil) {
+                try application.remove(thisUser!)
+            }
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
             self.editProfileButton.isEnabled = false;
@@ -310,17 +316,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
      identifier within the directory itself (e.g. a domain associated to the
      tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-     use for the current user flow. The policy we are using here is the `kSignupOrSignInPolicy`
-     as the app is signing the user in.
+     use for the current user flow.
      */
     func getAuthority(forPolicy: String) throws -> MSALAuthority {
         return try MSALAuthority(url: URL(fileURLWithPath: String(format: self.kEndpoint, self.kTenantName, forPolicy)))
     }
     
-    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
+    func getUserByPolicy (withUsers: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
         
         for user in withUsers {
-            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased())) {
+            if (user.homeAccountId?.objectId?.components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased()) ?? false) {
                 return user
             }
     }
