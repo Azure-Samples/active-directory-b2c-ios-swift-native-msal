@@ -59,20 +59,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      */
     
     @IBAction func authorizationButton(_ sender: UIButton) {
-        
-        /**
-        The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
-         a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-         identifier within the directory itself (e.g. a domain associated to the
-         tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-         use for the current user flow. The policy we are using here is the `kSignupOrSignInPolicy` 
-         as the app is signing the user in.
-        */
-        
-        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
-        
         /**
          
          Initialize a MSALPublicClientApplication with a given clientID and authority
@@ -90,6 +76,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          */
         
         do {
+            let kAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -123,25 +110,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     @IBAction func editProfile(_ sender: UIButton) {
-        
-        /**
-         The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
-         a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-         identifier within the directory itself (e.g. a domain associated to the
-         tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-         use for the current user flow. The policy we are using here is the `kEditProfilePolicy`
-         as the app is going to allow the user to edit their profile.
-         
-         Note that we don't store the accessToken that is returend by the acquireToken call this time.
-         This is because this acquireToken() call is only to invoke a policy of "editing the profile" and is not
-         meant to be used to call any additional APIs. When you call policies beyond your "sign in" policy
-         you should not store the access token as it's of no use to you.
-         */
-
-        let kAuthority = String(format: kEndpoint, kTenantName, kEditProfilePolicy)
-
         do {
             
             /**
@@ -160,6 +128,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
 
+            let kAuthority = try self.getAuthority(forPolicy: self.kEditProfilePolicy)
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -189,30 +158,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
 
     @IBAction func refreshToken(_ sender: UIButton) {
-        
-        /**
-         The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
-         a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-         identifier within the directory itself (e.g. a domain associated to the
-         tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-         use for the current user flow. The policy we are using here is the `kSignupOrSigninPolicy`
-         *as that is the policy we originally acquired the token with*. It is very important that all actions
-         against a token acquired by a policy maintains the user of that policy on each call.
-         
-         Note the fact that we also look for `InteractionRequired` as an error code and
-         prompt the user interactively. Often times the inability to use a refresh token
-         is from either a password change, refersh token expiring, or other event that
-         can be remedied by the user signing in again. This shouldn't be necessary at every
-         `AcquireTokenSilent()`. If you are experiencing that in your application, make
-         sure you are using the cache correctly and using the same authority.
-         */
-        
-        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
-        
         do {
-            
+            let kAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -226,6 +173,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              authentication flow will be locked down to.
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
+             
+             Note the fact that we also look for `InteractionRequired` as an error code and
+             prompt the user interactively. Often times the inability to use a refresh token
+             is from either a password change, refersh token expiring, or other event that
+             can be remedied by the user signing in again. This shouldn't be necessary at every
+             `AcquireTokenSilent()`. If you are experiencing that in your application, make
+             sure you are using the cache correctly and using the same authority.
              */
             
             let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
@@ -286,21 +240,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     @IBAction func signoutButton(_ sender: UIButton) {
-        
-        /**
-         The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
-         a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-         identifier within the directory itself (e.g. a domain associated to the
-         tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-         use for the current user flow. The policy we are using here is the `kSignupOrSigninPolicy`
-         *as that is the policy we originally acquired the token with*. It is very important that all actions
-         against a token acquired by a policy maintains the user of that policy on each call.
-         */
-        
-         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
-        
         do {
             
             /**
@@ -318,6 +257,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              not interested in the specific error pass in nil.
              */
             
+            let kAuthority = self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
             
             /**
@@ -361,6 +301,20 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             
         }
+    }
+    
+    /**
+     The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
+     a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
+     it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
+     directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
+     identifier within the directory itself (e.g. a domain associated to the
+     tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
+     use for the current user flow. The policy we are using here is the `kSignupOrSignInPolicy`
+     as the app is signing the user in.
+     */
+    func getAuthority(forPolicy: String) throws -> MSALAuthority {
+        return try MSALAuthority(url: URL(fileURLWithPath: String(format: self.kEndpoint, self.kTenantName, forPolicy)))
     }
     
     func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
