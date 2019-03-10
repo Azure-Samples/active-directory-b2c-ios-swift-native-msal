@@ -319,7 +319,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      use for the current user flow.
      */
     func getAuthority(forPolicy: String) throws -> MSALAuthority {
-        return try MSALAuthority(url: URL(fileURLWithPath: String(format: self.kEndpoint, self.kTenantName, forPolicy)))
+        return try MSALAuthority(url: URL(string: String(format: self.kEndpoint, self.kTenantName, forPolicy))!)
     }
     
     func getUserByPolicy (withUsers: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
