@@ -1,4 +1,4 @@
---- 
+---
 Services: active-directory-b2c
 platforms: iOS
 author: brandwe
@@ -32,14 +32,14 @@ do {
       }
     }
 }
-            
+
         catch {
             print(error)
         }
     }
 ```
 
-## App Registration 
+## App Registration
 
 You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-get-started). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
 
@@ -52,7 +52,7 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 
 1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
 1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
-1. Run `carthage update`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
+1. Run `carthage bootstrap`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
 1. On your application targets’ “General” settings tab, in the “Linked Frameworks and Libraries” section, drag and drop the `MSAL.framework` from the `Carthage/Build` folder on disk.
 1. On your application targets’ “Build Phases” settings tab, click the “+” icon and choose “New Run Script Phase”. Create a Run Script in which you specify your shell (ex: `/bin/sh`), add the following contents to the script area below the shell:
 
@@ -110,7 +110,7 @@ In the `ViewControler.swift` file, update the variables at the top of this file 
 
 We use Stack Overflow to provide support using [tag MSAL](http://stackoverflow.com/questions/tagged/msal) and [tag azure-ad-b2c](http://stackoverflow.com/questions/tagged/azure-ad-b2c). We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 
-If you find and bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
+If you find and bug or have a feature request, please raise the issue on [GitHub Issues](../../issues).
 
 To provide a recommendation, visit our [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 
