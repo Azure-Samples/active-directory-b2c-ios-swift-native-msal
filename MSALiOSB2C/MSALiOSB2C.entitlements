@@ -6,6 +6,7 @@
 	<array>
 		<string>$(AppIdentifierPrefix)com.microsoft.identity.client.sample.MSALiOSB2C</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.msalcache</string>
+		<string>$(AppIdentifierPrefix)com.microsoft.adalcache</string>
 	</array>
 </dict>
 </plist>

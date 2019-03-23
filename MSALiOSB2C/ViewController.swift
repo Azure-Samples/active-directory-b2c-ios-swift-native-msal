@@ -43,7 +43,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
-    var accessToken = String()
+    var account: MSALAccount?
+    var accessToken: String?;
     
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
@@ -92,7 +93,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             application.acquireToken(forScopes: kScopes) { (result, error) in
                     if  error == nil {
-                        self.accessToken = (result?.accessToken)!
+                        self.account = result?.account
+                        self.accessToken = result?.accessToken
                         self.loggingText.text = "Access token is \(self.accessToken)"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
@@ -141,9 +143,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kEditProfilePolicy)
-            
-            application.acquireToken(forScopes: kScopes, account:thisUser ) { (result, error) in
+            application.acquireToken(forScopes: kScopes, account: self.account ) { (result, error) in
                     if error == nil {
                         self.loggingText.text = "Successfully edited profile"
                         
@@ -182,24 +182,21 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              sure you are using the cache correctly and using the same authority.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
-            
-            guard (thisUser != nil) else {
+            guard (self.account != nil) else {
                 return
             }
     
-            application.acquireTokenSilent(forScopes: kScopes, account: thisUser! ) { (result, error) in
+            application.acquireTokenSilent(forScopes: kScopes, account: self.account! ) { (result, error) in
                     if error == nil {
                         self.accessToken = (result?.accessToken)!
                         self.loggingText.text = "Refreshing token silently"
                         self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
                         
                     }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
-                        
                         // Notice we supply the user here. This ensures we acquire token for the same user
                         // as we originally authenticated.
                         
-                        application.acquireToken(forScopes: self.kScopes, account: thisUser!) { (result, error) in
+                        application.acquireToken(forScopes: self.kScopes, account: self.account!) { (result, error) in
                                 if error == nil {
                                     self.accessToken = (result?.accessToken)!
                                     self.loggingText.text = "Access token is \(self.accessToken)"
@@ -266,14 +263,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             /**
              Removes all tokens from the cache for this application for the provided user
-             
-             - user:    The user to remove from the cache
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
-            
-            if (thisUser != nil) {
-                try application.remove(thisUser!)
+            if (self.account != nil) {
+                try application.remove(self.account!)
             }
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
@@ -297,15 +290,11 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        
-        if self.accessToken.isEmpty {
-            
+        if self.accessToken != nil {
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
             editProfileButton.isEnabled = false;
             refreshTokenButton.isEnabled = false;
-            
-            
         }
     }
     
@@ -321,17 +310,4 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     func getAuthority(forPolicy: String) throws -> MSALAuthority {
         return try MSALAuthority(url: URL(string: String(format: self.kEndpoint, self.kTenantName, forPolicy))!)
     }
-    
-    func getUserByPolicy (withUsers: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
-        
-        for user in withUsers {
-            if (user.homeAccountId?.objectId?.components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased()) ?? false) {
-                return user
-            }
-    }
-        return nil
-   }
-
-
 }
-
