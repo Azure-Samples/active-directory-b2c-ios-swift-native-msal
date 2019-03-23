@@ -44,7 +44,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
     var account: MSALAccount?
-    var accessToken = String();
+    var accessToken: String?
     
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
@@ -94,8 +94,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             application.acquireToken(forScopes: kScopes) { (result, error) in
                     if  error == nil {
                         self.account = result?.account
-                        self.accessToken = (result?.accessToken)!
-                        self.loggingText.text = "Access token is \(self.accessToken)"
+                        self.accessToken = result?.accessToken
+                        self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
                         self.editProfileButton.isEnabled = true;
@@ -182,15 +182,15 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              sure you are using the cache correctly and using the same authority.
              */
             
-            guard (self.account != nil) else {
+            guard let account = self.account else {
                 return
             }
     
-            application.acquireTokenSilent(forScopes: kScopes, account: self.account! ) { (result, error) in
+            application.acquireTokenSilent(forScopes: kScopes, account: account ) { (result, error) in
                     if error == nil {
-                        self.accessToken = (result?.accessToken)!
+                        self.accessToken = result?.accessToken
                         self.loggingText.text = "Refreshing token silently"
-                        self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
+                        self.loggingText.text = "Refreshed Access token is \(self.accessToken ?? "Empty")"
                         
                     }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
                         // Notice we supply the user here. This ensures we acquire token for the same user
@@ -198,8 +198,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         
                         application.acquireToken(forScopes: self.kScopes, account: self.account!) { (result, error) in
                                 if error == nil {
-                                    self.accessToken = (result?.accessToken)!
-                                    self.loggingText.text = "Access token is \(self.accessToken)"
+                                    self.accessToken = result?.accessToken
+                                    self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
                                     
                                 } else  {
                                     self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
@@ -216,27 +216,29 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     @IBAction func callApi(_ sender: UIButton) {
+        guard let accessToken = self.accessToken else {
+            return
+        }
             
+        let sessionConfig = URLSessionConfiguration.default
+        let url = URL(string: self.kGraphURI)
+        var request = URLRequest(url: url!)
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+        
+        urlSession.dataTask(with: request) { data, response, error in
             
-            let sessionConfig = URLSessionConfiguration.default
-            let url = URL(string: self.kGraphURI)
-            var request = URLRequest(url: url!)
-            request.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
-            let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
-            
-            urlSession.dataTask(with: request) { data, response, error in
-                
-                if error == nil {
-                    let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                        if result != nil {
-                            self.loggingText.text = "API response: \(result.debugDescription)"
-                        } else {
-                            self.loggingText.text = "Nothing returned from API"
-                        }
-                } else {
-                    self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
-                }
-                }.resume()
+            if error == nil {
+                let result = try? JSONSerialization.jsonObject(with: data!, options: [])
+                    if result != nil {
+                        self.loggingText.text = "API response: \(result.debugDescription)"
+                    } else {
+                        self.loggingText.text = "Nothing returned from API"
+                    }
+            } else {
+                self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+            }
+            }.resume()
         
     }
     
@@ -290,7 +292,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if self.accessToken.isEmpty {
+        if self.accessToken == nil {
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
             editProfileButton.isEnabled = false;
