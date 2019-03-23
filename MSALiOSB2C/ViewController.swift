@@ -44,7 +44,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
     var account: MSALAccount?
-    var accessToken: String?;
+    var accessToken = String();
     
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
@@ -94,7 +94,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             application.acquireToken(forScopes: kScopes) { (result, error) in
                     if  error == nil {
                         self.account = result?.account
-                        self.accessToken = result?.accessToken
+                        self.accessToken = (result?.accessToken)!
                         self.loggingText.text = "Access token is \(self.accessToken)"
                         self.signoutButton.isEnabled = true;
                         self.callGraphApiButton.isEnabled = true;
@@ -143,7 +143,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            application.acquireToken(forScopes: kScopes, account: self.account ) { (result, error) in
+            application.acquireToken(forScopes: kScopes ) { (result, error) in
                     if error == nil {
                         self.loggingText.text = "Successfully edited profile"
                         
@@ -290,7 +290,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if self.accessToken != nil {
+        if self.accessToken.isEmpty {
             signoutButton.isEnabled = false;
             callGraphApiButton.isEnabled = false;
             editProfileButton.isEnabled = false;
