@@ -153,7 +153,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     }
             }
         } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            self.loggingText.text = "Unable to create application: \(error)"
         }
     }
 
@@ -190,7 +190,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     if error == nil {
                         self.accessToken = result?.accessToken
                         self.loggingText.text = "Refreshing token silently"
-                        self.loggingText.text = "Refreshed Access token is \(self.accessToken ?? "Empty")"
+                        self.loggingText.text = "Refreshed access token is \(self.accessToken ?? "empty")"
                         
                     }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
                         // Notice we supply the user here. This ensures we acquire token for the same user
@@ -199,7 +199,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                         application.acquireToken(forScopes: self.kScopes, account: self.account!) { (result, error) in
                                 if error == nil {
                                     self.accessToken = result?.accessToken
-                                    self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
+                                    self.loggingText.text = "Access token is \(self.accessToken ?? "empty")"
                                     
                                 } else  {
                                     self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
