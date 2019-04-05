@@ -92,19 +92,18 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
             
             application.acquireToken(forScopes: kScopes) { (result, error) in
-                    if  error == nil {
-                        self.account = result?.account
-                        self.accessToken = result?.accessToken
-                        self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
-                        self.signoutButton.isEnabled = true;
-                        self.callGraphApiButton.isEnabled = true;
-                        self.editProfileButton.isEnabled = true;
-                        self.refreshTokenButton.isEnabled = true;
-                        
-                        
-                    } else {
-                        self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
-                    }
+                guard let validResult = result else {
+                    self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
+                    return
+                }
+                
+                self.account = validResult.account
+                self.accessToken = validResult.accessToken
+                self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
+                self.signoutButton.isEnabled = true;
+                self.callGraphApiButton.isEnabled = true;
+                self.editProfileButton.isEnabled = true;
+                self.refreshTokenButton.isEnabled = true;
             }
         } catch {
             self.loggingText.text = "Unable to create application \(error)"
@@ -144,13 +143,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             application.acquireToken(forScopes: kScopes ) { (result, error) in
-                    if error == nil {
-                        self.loggingText.text = "Successfully edited profile"
-                        
-                        
-                    } else {
-                        self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
-                    }
+                guard let _ = result else {
+                    self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
+                    return
+                }
+                
+                self.loggingText.text = "Successfully edited profile"
             }
         } catch {
             self.loggingText.text = "Unable to create application: \(error)"
@@ -187,32 +185,36 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             }
     
             application.acquireTokenSilent(forScopes: kScopes, account: account ) { (result, error) in
-                    if error == nil {
-                        self.accessToken = result?.accessToken
-                        self.loggingText.text = "Refreshing token silently"
-                        self.loggingText.text = "Refreshed access token is \(self.accessToken ?? "empty")"
-                        
-                    }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
+                guard let validResult = result else {
+                    if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
                         // Notice we supply the user here. This ensures we acquire token for the same user
                         // as we originally authenticated.
                         
                         application.acquireToken(forScopes: self.kScopes, account: self.account!) { (result, error) in
-                                if error == nil {
-                                    self.accessToken = result?.accessToken
-                                    self.loggingText.text = "Access token is \(self.accessToken ?? "empty")"
-                                    
-                                } else  {
-                                    self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
-                                }
+                            guard let validResult = result else {
+                                self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                                
+                                return
+                            }
+                            
+                            self.accessToken = validResult.accessToken
+                            self.loggingText.text = "Access token is \(self.accessToken ?? "empty")"
                         }
                     } else {
                         self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                     }
+                    
+                    return
+                }
+                
+                self.accessToken = validResult.accessToken
+                self.loggingText.text = "Refreshing token silently"
+                self.loggingText.text = "Refreshed access token is \(self.accessToken ?? "empty")"
             }
-            } catch {
+        } catch {
             self.loggingText.text = "Unable to create application \(error)"
-            
-            }
+        
+        }
     }
     
     @IBAction func callApi(_ sender: UIButton) {
@@ -228,17 +230,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
         urlSession.dataTask(with: request) { data, response, error in
             
-            if error == nil {
-                let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                    if result != nil {
-                        self.loggingText.text = "API response: \(result.debugDescription)"
-                    } else {
-                        self.loggingText.text = "Nothing returned from API"
-                    }
-            } else {
-                self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
-            }
-            }.resume()
+        if error == nil {
+            let result = try? JSONSerialization.jsonObject(with: data!, options: [])
+                if result != nil {
+                    self.loggingText.text = "API response: \(result.debugDescription)"
+                } else {
+                    self.loggingText.text = "Nothing returned from API"
+                }
+        } else {
+            self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+        }
+        }.resume()
         
     }
     
