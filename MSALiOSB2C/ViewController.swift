@@ -230,16 +230,19 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
         urlSession.dataTask(with: request) { data, response, error in
             
-        if error == nil {
-            let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                if result != nil {
-                    self.loggingText.text = "API response: \(result.debugDescription)"
-                } else {
-                    self.loggingText.text = "Nothing returned from API"
-                }
-        } else {
-            self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
-        }
+            guard let validData = data else {
+                self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+                return
+            }
+            
+            let result = try? JSONSerialization.jsonObject(with: validData, options: [])
+            
+            guard let validResult = result as? [String: Any] else {
+                self.loggingText.text = "Nothing returned from API"
+                return
+            }
+            
+            self.loggingText.text = "API response: \(validResult.debugDescription)"
         }.resume()
         
     }
