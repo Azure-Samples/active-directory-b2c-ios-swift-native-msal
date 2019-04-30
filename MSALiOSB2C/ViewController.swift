@@ -39,7 +39,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
     let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
-
+    
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
     
@@ -61,7 +61,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     @IBAction func authorizationButton(_ sender: UIButton) {
         
         /**
-        The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
+         The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
          a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
          it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
          directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
@@ -69,13 +69,15 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
          use for the current user flow. The policy we are using here is the `kSignupOrSignInPolicy` 
          as the app is signing the user in.
-        */
+         */
         
         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
         /**
          
-         Initialize a MSALPublicClientApplication with a given clientID and authority
+         Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
+         MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
+         Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
          
          - clientId:     The clientID of your application, you should get this from the app portal.
          - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
@@ -90,7 +92,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          */
         
         do {
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
+            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication.init(configuration: pcaConfig)
+            
             
             /**
              Acquire a token for a new user using interactive authentication
@@ -101,21 +106,21 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
              */
-        
+            
             
             application.acquireToken(forScopes: kScopes) { (result, error) in
-                    if  error == nil {
-                        self.accessToken = (result?.accessToken)!
-                        self.loggingText.text = "Access token is \(self.accessToken)"
-                        self.signoutButton.isEnabled = true;
-                        self.callGraphApiButton.isEnabled = true;
-                        self.editProfileButton.isEnabled = true;
-                        self.refreshTokenButton.isEnabled = true;
-                        
-                        
-                    } else {
-                        self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
-                    }
+                if  error == nil {
+                    self.accessToken = (result?.accessToken)!
+                    self.loggingText.text = "Access token is \(self.accessToken)"
+                    self.signoutButton.isEnabled = true;
+                    self.callGraphApiButton.isEnabled = true;
+                    self.editProfileButton.isEnabled = true;
+                    self.refreshTokenButton.isEnabled = true;
+                    
+                    
+                } else {
+                    self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
+                }
             }
         } catch {
             self.loggingText.text = "Unable to create application \(error)"
@@ -139,14 +144,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          meant to be used to call any additional APIs. When you call policies beyond your "sign in" policy
          you should not store the access token as it's of no use to you.
          */
-
+        
         let kAuthority = String(format: kEndpoint, kTenantName, kEditProfilePolicy)
-
+        
         do {
             
             /**
              
-             Initialize a MSALPublicClientApplication with a given clientID and authority
+             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
+             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
+             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
              
              - clientId:     The clientID of your application, you should get this from the app portal.
              - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
@@ -159,11 +166,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              not interested in the specific error pass in nil.
              
              */
-
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            
+            let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
+            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication.init(configuration: pcaConfig)
             
             /**
-             Acquire a token for a new user using interactive authentication
+             Acquire a token for a new account using interactive authentication
              
              - forScopes: Permissions you want included in the access token received
              in the result in the completionBlock. Not all scopes are
@@ -172,22 +181,22 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kEditProfilePolicy)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kEditProfilePolicy)
             
-            application.acquireToken(forScopes: kScopes, user:thisUser ) { (result, error) in
-                    if error == nil {
-                        self.loggingText.text = "Successfully edited profile"
-                        
-                        
-                    } else {
-                        self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
-                    }
+            application.acquireToken(forScopes: kScopes, account: thisAccount) { (result, error) in
+                if error == nil {
+                    self.loggingText.text = "Successfully edited profile"
+                    
+                    
+                } else {
+                    self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
+                }
             }
         } catch {
             self.loggingText.text = "Unable to create application \(error)"
         }
     }
-
+    
     @IBAction func refreshToken(_ sender: UIButton) {
         
         /**
@@ -213,7 +222,27 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
         do {
             
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            /**
+             
+             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
+             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
+             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
+             
+             - clientId:     The clientID of your application, you should get this from the app portal.
+             - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
+             it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
+             directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
+             identifier within the directory itself (e.g. a domain associated to the
+             tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
+             use for the current user flow.
+             - error:       The error that occurred creating the application object, if any, if you're
+             not interested in the specific error pass in nil.
+             
+             */
+            
+            let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
+            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication.init(configuration: pcaConfig)
             
             /**
              
@@ -228,60 +257,64 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
-    
-            application.acquireTokenSilent(forScopes: kScopes, user: thisUser ) { (result, error) in
-                    if error == nil {
-                        self.accessToken = (result?.accessToken)!
-                        self.loggingText.text = "Refreshing token silently"
-                        self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
-                        
-                    }  else if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
-                        
-                        // Notice we supply the user here. This ensures we acquire token for the same user
-                        // as we originally authenticated.
-                        
-                        application.acquireToken(forScopes: self.kScopes, user: thisUser) { (result, error) in
-                                if error == nil {
-                                    self.accessToken = (result?.accessToken)!
-                                    self.loggingText.text = "Access token is \(self.accessToken)"
-                                    
-                                } else  {
-                                    self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
-                                }
-                        }
-                    } else {
-                        self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
-                    }
-            }
-            } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
             
+            if thisAccount == nil {
+                self.loggingText.text = "There is no account available!"
+                return;
             }
+            
+            application.acquireTokenSilent(forScopes: kScopes, account: thisAccount! ) { (result, error) in
+                if error == nil {
+                    self.accessToken = (result?.accessToken)!
+                    self.loggingText.text = "Refreshing token silently"
+                    self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
+                    
+                }  else if ((error! as NSError).code == MSALError.interactionRequired.rawValue) {
+                    
+                    // Notice we supply the user here. This ensures we acquire token for the same user
+                    // as we originally authenticated.
+                    
+                    application.acquireToken(forScopes: self.kScopes, account: thisAccount) { (result, error) in
+                        if error == nil {
+                            self.accessToken = (result?.accessToken)!
+                            self.loggingText.text = "Access token is \(self.accessToken)"
+                            
+                        } else  {
+                            self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                        }
+                    }
+                } else {
+                    self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
+                }
+            }
+        } catch {
+            self.loggingText.text = "Unable to create application \(error)"
+        }
     }
     
     @IBAction func callApi(_ sender: UIButton) {
+        
+        
+        let sessionConfig = URLSessionConfiguration.default
+        let url = URL(string: self.kGraphURI)
+        var request = URLRequest(url: url!)
+        request.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
+        let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+        
+        urlSession.dataTask(with: request) { data, response, error in
             
-            
-            let sessionConfig = URLSessionConfiguration.default
-            let url = URL(string: self.kGraphURI)
-            var request = URLRequest(url: url!)
-            request.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
-            let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
-            
-            urlSession.dataTask(with: request) { data, response, error in
-                
-                if error == nil {
-                    let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                        if result != nil {
-                            self.loggingText.text = "API response: \(result.debugDescription)"
-                        } else {
-                            self.loggingText.text = "Nothing returned from API"
-                        }
+            if error == nil {
+                let result = try? JSONSerialization.jsonObject(with: data!, options: [])
+                if result != nil {
+                    self.loggingText.text = "API response: \(result.debugDescription)"
                 } else {
-                    self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+                    self.loggingText.text = "Nothing returned from API"
                 }
-                }.resume()
+            } else {
+                self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+            }
+            }.resume()
         
     }
     
@@ -299,13 +332,15 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          against a token acquired by a policy maintains the user of that policy on each call.
          */
         
-         let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
+        let kAuthority = String(format: kEndpoint, kTenantName, kSignupOrSigninPolicy)
         
         do {
             
             /**
              
-             Initialize a MSALPublicClientApplication with a given clientID and authority
+             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
+             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
+             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
              
              - clientId:     The clientID of your application, you should get this from the app portal.
              - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
@@ -316,35 +351,41 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              use for the current user flow.
              - error:       The error that occurred creating the application object, if any, if you're
              not interested in the specific error pass in nil.
+             
              */
             
-            let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+            let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
+            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication.init(configuration: pcaConfig)
             
             /**
-             Removes all tokens from the cache for this application for the provided user
+             Removes all tokens from the cache for this application for the provided account
              
-             - user:    The user to remove from the cache
+             - account:    The account to remove from the cache
              */
             
-            let thisUser = try self.getUserByPolicy(withUsers: application.users(), forPolicy: kSignupOrSigninPolicy)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
             
-            try application.remove(thisUser)
+            if thisAccount != nil {
+                try application.remove(thisAccount!)
+            }
+            
             self.signoutButton.isEnabled = false;
             self.callGraphApiButton.isEnabled = false;
             self.editProfileButton.isEnabled = false;
             self.refreshTokenButton.isEnabled = false;
             
         } catch  {
-            self.loggingText.text = "Received error signing user out: \(error)"
+            self.loggingText.text = "Received error signing out: \(error)"
         }
     }
-
-
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -363,16 +404,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    func getUserByPolicy (withUsers: [MSALUser], forPolicy: String) throws -> MSALUser? {
+    func getAccountByPolicy (withAccounts: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
         
-        for user in withUsers {
-            if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased())) {
-                return user
+        for account in withAccounts {
+            if (account.homeAccountId != nil && account.homeAccountId!.objectId!.hasSuffix(forPolicy.lowercased())) {
+                return account
             }
-    }
+        }
         return nil
-   }
-
-
+    }
+    
+    
 }
 
