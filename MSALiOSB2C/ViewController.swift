@@ -264,7 +264,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                 return;
             }
             
-            application.acquireTokenSilent(forScopes: kScopes, account: thisAccount! ) { (result, error) in
+            let parameters = MSALSilentTokenParameters.init(scopes: kScopes, account:thisAccount!)
+            application.acquireTokenSilent(with: parameters) { (result, error) in
                 if error == nil {
                     self.accessToken = (result?.accessToken)!
                     self.loggingText.text = "Refreshing token silently"
