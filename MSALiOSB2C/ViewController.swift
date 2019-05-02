@@ -107,8 +107,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            
-            application.acquireToken(forScopes: kScopes) { (result, error) in
+            let parameters = MSALInteractiveTokenParameters.init(scopes: kScopes)
+            application.acquireToken(with: parameters) { (result, error) in
                 if  error == nil {
                     self.accessToken = (result?.accessToken)!
                     self.loggingText.text = "Access token is \(self.accessToken)"
@@ -182,8 +182,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kEditProfilePolicy)
+            let parameters = MSALInteractiveTokenParameters.init(scopes: kScopes)
+            parameters.account = thisAccount
             
-            application.acquireToken(forScopes: kScopes, account: thisAccount) { (result, error) in
+            application.acquireToken(with: parameters) { (result, error) in
                 if error == nil {
                     self.loggingText.text = "Successfully edited profile"
                     
@@ -276,7 +278,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     // Notice we supply the user here. This ensures we acquire token for the same user
                     // as we originally authenticated.
                     
-                    application.acquireToken(forScopes: self.kScopes, account: thisAccount) { (result, error) in
+                    let parameters = MSALInteractiveTokenParameters.init(scopes: self.kScopes)
+                    parameters.account = thisAccount
+                    
+                    application.acquireToken(with: parameters) { (result, error) in
                         if error == nil {
                             self.accessToken = (result?.accessToken)!
                             self.loggingText.text = "Access token is \(self.accessToken)"
