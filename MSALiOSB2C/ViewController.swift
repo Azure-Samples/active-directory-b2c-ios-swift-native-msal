@@ -37,6 +37,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
     let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
+    let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
     let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
     
@@ -78,15 +79,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
          */
         
         do {
-            guard let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy) else {
-                self.loggingText.text = "Unable to create authority URL"
-                return
-            }
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
-            guard let application = try? MSALPublicClientApplication(configuration: pcaConfig) else {
-                self.loggingText.text = "Unable to create application!"
-                return
-            }
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
             /**
              Acquire a token for a new user using interactive authentication
@@ -108,6 +103,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     self.editProfileButton.isEnabled = true;
                     self.refreshTokenButton.isEnabled = true;
                     
+                } else if (self.isResetPasswordError(error: error!)){
+                    self.resetPassword()
                     
                 } else {
                     self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
@@ -139,15 +136,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
             
-            guard let authority = try self.getAuthority(forPolicy: self.kEditProfilePolicy) else {
-                self.loggingText.text = "Unable to create authority URL"
-                return
-            }
+            let authority = try self.getAuthority(forPolicy: self.kEditProfilePolicy)
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
-            guard let application = try? MSALPublicClientApplication(configuration: pcaConfig) else {
-                self.loggingText.text = "Unable to create application!"
-                return
-            }
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
             /**
              Acquire a token for a new account using interactive authentication
@@ -197,15 +188,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              not interested in the specific error pass in nil.
              
              */
-            guard let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy) else {
-                self.loggingText.text = "Unable to create authority URL"
-                return
-            }
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
-            guard let application = try? MSALPublicClientApplication(configuration: pcaConfig) else {
-                self.loggingText.text = "Unable to create application!"
-                return
-            }
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
             /**
              
@@ -306,15 +291,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
             
-            guard let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy) else {
-                self.loggingText.text = "Unable to create authority URL"
-                return
-            }
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
-            guard let application = try? MSALPublicClientApplication(configuration: pcaConfig) else {
-                self.loggingText.text = "Unable to create application!"
-                return
-            }
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
             /**
              Removes all tokens from the cache for this application for the provided account
@@ -362,6 +341,36 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
+    func resetPassword() {
+        do {
+            let authority = try self.getAuthority(forPolicy: self.kResetPasswordPolicy)
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+            
+            /**
+             Acquire a token for a new user using interactive authentication
+             
+             - forScopes: Permissions you want included in the access token received
+             in the result in the completionBlock. Not all scopes are
+             gauranteed to be included in the access token returned.
+             - completionBlock: The completion block that will be called when the authentication
+             flow completes, or encounters an error.
+             */
+            
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
+            application.acquireToken(with: parameters) { (result, error) in
+                if error == nil {
+                    self.loggingText.text = "Password reset finished!"
+                    
+                } else  {
+                    self.loggingText.text = "Could not finish password reset: \(error ?? "No error informarion" as! Error)"
+                }
+            }
+        } catch {
+            self.loggingText.text = "Unable to create application \(error)"
+        }
+    }
+    
     func getAccountByPolicy (withAccounts: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
         
         for account in withAccounts {
@@ -382,11 +391,29 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
      use for the current user flow.
      */
-    func getAuthority(forPolicy: String) throws -> MSALB2CAuthority? {
+    func getAuthority(forPolicy: String) throws -> MSALB2CAuthority {
         guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kTenantName, forPolicy)) else {
-            return nil
+            throw NSError(domain: "MSALErrorDomain",
+                          code: MSALInternalError.invalidParameter.rawValue,
+                          userInfo: nil)
         }
         return try MSALB2CAuthority(url: authorityURL)
+    }
+    
+    func isResetPasswordError(error: Error) -> Bool {
+        if (error as NSError).userInfo.isEmpty {
+            return false
+        }
+        
+        guard let errorDescription = (error as NSError).userInfo[MSALErrorDescriptionKey] else {
+            return false
+        }
+        
+        if ((errorDescription as! String).lowercased().contains("aadb2c90118")) {
+            return true
+        }
+        
+        return false
     }
 }
 
