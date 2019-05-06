@@ -24,7 +24,7 @@ do {
     // Create an instance of MSALPublicClientApplication with proper config
     let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
     let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: <your-client-id-here>, redirectUri: nil, authority: authority)
-    let application = try MSALPublicClientApplication.init(configuration: pcaConfig)
+    let application = try MSALPublicClientApplication(configuration: pcaConfig)
     
     application.acquireToken(forScopes: kScopes) { (result, error) in
     DispatchQueue.main.async {

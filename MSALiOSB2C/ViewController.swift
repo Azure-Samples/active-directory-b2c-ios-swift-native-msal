@@ -37,11 +37,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
     let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
+    let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
     let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
     
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
     let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
+    
+    var application: MSALPublicClientApplication!
     
     var accessToken = String()
     
@@ -51,6 +54,24 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     @IBOutlet weak var editProfileButton: UIButton!
     @IBOutlet weak var refreshTokenButton: UIButton!
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        do {
+            /**
+             
+             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
+             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
+             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
+             
+             */
+            
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID)
+            self.application = try MSALPublicClientApplication(configuration: pcaConfig)
+        } catch {
+            self.loggingText.text = "Unable to create application \(error)"
+        }
+    }
     
     /**
      This button will invoke the authorization flow and send the policy specified to the B2C server.
@@ -59,28 +80,19 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      */
     
     @IBAction func authorizationButton(_ sender: UIButton) {
-        /**
-         
-         Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
-         MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-         Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-         
-         - clientId:     The clientID of your application, you should get this from the app portal.
-         - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-         identifier within the directory itself (e.g. a domain associated to the
-         tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-         use for the current user flow.
-         - error:       The error that occurred creating the application object, if any, if you're
-         not interested in the specific error pass in nil.
-         
-         */
-        
         do {
-            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
-            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+            /**
+             
+             authority is a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
+             it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
+             directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
+             identifier within the directory itself (e.g. a domain associated to the
+             tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
+             use for the current user flow.
+             
+             */
+            
+            let authority = try self.getAuthority(policy: self.kSignupOrSigninPolicy)
             
             /**
              Acquire a token for a new user using interactive authentication
@@ -93,22 +105,21 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
+            parameters.authority = authority
             application.acquireToken(with: parameters) { (result, error) in
                 if  error == nil {
                     self.accessToken = (result?.accessToken)!
                     self.loggingText.text = "Access token is \(self.accessToken)"
-                    self.signoutButton.isEnabled = true;
-                    self.callGraphApiButton.isEnabled = true;
-                    self.editProfileButton.isEnabled = true;
-                    self.refreshTokenButton.isEnabled = true;
-                    
-                    
+                    self.signoutButton.isEnabled = true
+                    self.callGraphApiButton.isEnabled = true
+                    self.editProfileButton.isEnabled = true
+                    self.refreshTokenButton.isEnabled = true
                 } else {
                     self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
                 }
             }
         } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            self.loggingText.text = "Unable to create authority \(error)"
         }
     }
     
@@ -117,25 +128,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             /**
              
-             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
-             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             
-             - clientId:     The clientID of your application, you should get this from the app portal.
-             - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
+             authority is a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
              it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
              directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
              identifier within the directory itself (e.g. a domain associated to the
              tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
              use for the current user flow.
-             - error:       The error that occurred creating the application object, if any, if you're
-             not interested in the specific error pass in nil.
              
              */
             
-            let authority = try self.getAuthority(forPolicy: self.kEditProfilePolicy)
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
-            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+            let authority = try self.getAuthority(policy: self.kEditProfilePolicy)
             
             /**
              Acquire a token for a new account using interactive authentication
@@ -147,8 +149,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kEditProfilePolicy)
-            let parameters = MSALInteractiveTokenParameters.init(scopes: kScopes)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kEditProfilePolicy)
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
+            parameters.authority = authority
             parameters.account = thisAccount
             
             application.acquireToken(with: parameters) { (result, error) in
@@ -161,33 +164,24 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                 }
             }
         } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            self.loggingText.text = "Unable to construct parameters before calling acquire token \(error)"
         }
     }
     
     @IBAction func refreshToken(_ sender: UIButton) {
         do {
-            
             /**
              
-             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
-             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             
-             - clientId:     The clientID of your application, you should get this from the app portal.
-             - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
+             authority is a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
              it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
              directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
              identifier within the directory itself (e.g. a domain associated to the
              tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
              use for the current user flow.
-             - error:       The error that occurred creating the application object, if any, if you're
-             not interested in the specific error pass in nil.
              
              */
-            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
-            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
-            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+            
+            let authority = try self.getAuthority(policy: self.kSignupOrSigninPolicy)
             
             /**
              
@@ -202,15 +196,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
-            
-            if thisAccount == nil {
+            guard let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kSignupOrSigninPolicy) else {
                 self.loggingText.text = "There is no account available!"
-                return;
+                return
             }
             
-            let parameters = MSALSilentTokenParameters.init(scopes: kScopes, account:thisAccount!)
-            application.acquireTokenSilent(with: parameters) { (result, error) in
+            let parameters = MSALSilentTokenParameters(scopes: kScopes, account:thisAccount)
+            parameters.authority = authority
+            self.application.acquireTokenSilent(with: parameters) { (result, error) in
                 if error == nil {
                     self.accessToken = (result?.accessToken)!
                     self.loggingText.text = "Refreshing token silently"
@@ -221,10 +214,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                     // Notice we supply the user here. This ensures we acquire token for the same user
                     // as we originally authenticated.
                     
-                    let parameters = MSALInteractiveTokenParameters.init(scopes: self.kScopes)
+                    let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes)
                     parameters.account = thisAccount
                     
-                    application.acquireToken(with: parameters) { (result, error) in
+                    self.application.acquireToken(with: parameters) { (result, error) in
                         if error == nil {
                             self.accessToken = (result?.accessToken)!
                             self.loggingText.text = "Access token is \(self.accessToken)"
@@ -238,7 +231,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                 }
             }
         } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            self.loggingText.text = "Unable to construct parameters before calling acquire token \(error)"
         }
     }
     
@@ -269,55 +262,26 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     @IBAction func signoutButton(_ sender: UIButton) {
         do {
-            
-            /**
-             
-             Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
-             MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             
-             - clientId:     The clientID of your application, you should get this from the app portal.
-             - authority:    A URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-             it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-             directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-             identifier within the directory itself (e.g. a domain associated to the
-             tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
-             use for the current user flow.
-             - error:       The error that occurred creating the application object, if any, if you're
-             not interested in the specific error pass in nil.
-             
-             */
-            
-            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
-            let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: kClientID, redirectUri: nil, authority: authority)
-            let application = try MSALPublicClientApplication(configuration: pcaConfig)
-            
             /**
              Removes all tokens from the cache for this application for the provided account
              
              - account:    The account to remove from the cache
              */
             
-            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), forPolicy: kSignupOrSigninPolicy)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kSignupOrSigninPolicy)
             
-            if thisAccount != nil {
-                try application.remove(thisAccount!)
+            if let accountToRemove = thisAccount {
+                try application.remove(accountToRemove)
             }
             
-            self.signoutButton.isEnabled = false;
-            self.callGraphApiButton.isEnabled = false;
-            self.editProfileButton.isEnabled = false;
-            self.refreshTokenButton.isEnabled = false;
+            self.signoutButton.isEnabled = false
+            self.callGraphApiButton.isEnabled = false
+            self.editProfileButton.isEnabled = false
+            self.refreshTokenButton.isEnabled = false
             
         } catch  {
             self.loggingText.text = "Received error signing out: \(error)"
         }
-    }
-    
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
     
     override func didReceiveMemoryWarning() {
@@ -328,20 +292,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     override func viewWillAppear(_ animated: Bool) {
         
         if self.accessToken.isEmpty {
-            
-            signoutButton.isEnabled = false;
-            callGraphApiButton.isEnabled = false;
-            editProfileButton.isEnabled = false;
-            refreshTokenButton.isEnabled = false;
-            
-            
+            signoutButton.isEnabled = false
+            callGraphApiButton.isEnabled = false
+            editProfileButton.isEnabled = false
+            refreshTokenButton.isEnabled = false
         }
     }
     
-    func getAccountByPolicy (withAccounts: [MSALAccount], forPolicy: String) throws -> MSALAccount? {
+    func getAccountByPolicy (withAccounts: [MSALAccount], policy: String) throws -> MSALAccount? {
         
         for account in withAccounts {
-            if (account.homeAccountId != nil && account.homeAccountId!.objectId!.hasSuffix(forPolicy.lowercased())) {
+            if (account.homeAccountId != nil && account.homeAccountId!.objectId!.hasSuffix(policy.lowercased())) {
                 return account
             }
         }
@@ -350,19 +311,18 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     /**
      
-     The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`,
-     for user in withUsers {         a URL indicating a directory that MSAL can use to obtain tokens. In Azure B2C
-     if (user.userIdentifier().components(separatedBy: ".")[0].hasSuffix(forPolicy.lowercased())) {         it is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
-     return user         directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
-     }         identifier within the directory itself (e.g. a domain associated to the
+     The way B2C knows what actions to perform for the user of the app is through the use of `Authority URL`.
+     It is of the form `https://<instance/tfp/<tenant>/<policy>`, where `<instance>` is the
+     directory host (e.g. https://login.microsoftonline.com), `<tenant>` is a
+     identifier within the directory itself (e.g. a domain associated to the
      tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
      use for the current user flow.
      */
-    func getAuthority(forPolicy: String) throws -> MSALB2CAuthority {
-        guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kTenantName, forPolicy)) else {
-            throw NSError(domain: "MSALErrorDomain",
-                          code: MSALInternalError.invalidParameter.rawValue,
-                          userInfo: nil)
+    func getAuthority(policy: String) throws -> MSALB2CAuthority {
+        guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kTenantName, policy)) else {
+            throw NSError(domain: "SomeDomain",
+                          code: 1,
+                          userInfo: ["errorDescription": "Unable to create authority URL!"])
         }
         return try MSALB2CAuthority(url: authorityURL)
     }
