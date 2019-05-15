@@ -27,7 +27,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>msauth.com.microsoft.identity.client.sample.MSALiOSB2C</string>
+				<string>msal90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6</string>
 			</array>
 		</dict>
 	</array>

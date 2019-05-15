@@ -62,14 +62,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
              MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msauth.<your-bundle-id-here>://auth" if not provided.
-             The scheme part, i.e. "msauth.<your-bundle-id-here>", needs to be registered in the info.plist of the project
+             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
+             The scheme part, i.e. "msal<your-client-id-here>", needs to be registered in the info.plist of the project
              */
             
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID)
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
-            self.loggingText.text = "Unable to create application \(error)"
+            self.updateLoggingText(text: "Unable to create application \(error)")
         }
     }
     
@@ -109,17 +109,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             application.acquireToken(with: parameters) { (result, error) in
                 if let result = result {
                     self.accessToken = result.accessToken
-                    self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
+                    self.updateLoggingText(text: "Access token is \(self.accessToken ?? "Empty")")
                     self.signoutButton.isEnabled = true
                     self.callGraphApiButton.isEnabled = true
                     self.editProfileButton.isEnabled = true
                     self.refreshTokenButton.isEnabled = true
                 } else {
-                    self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
+                    self.updateLoggingText(text: "Could not acquire token: \(error ?? "No error informarion" as! Error)")
                 }
             }
         } catch {
-            self.loggingText.text = "Unable to create authority \(error)"
+            self.updateLoggingText(text: "Unable to create authority \(error)")
         }
     }
     
@@ -156,13 +156,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             application.acquireToken(with: parameters) { (result, error) in
                 if let error = error {
-                    self.loggingText.text = "Could not edit profile: \(error)"
+                    self.updateLoggingText(text: "Could not edit profile: \(error)")
                 } else {
-                    self.loggingText.text = "Successfully edited profile"
+                    self.updateLoggingText(text: "Successfully edited profile")
                 }
             }
         } catch {
-            self.loggingText.text = "Unable to construct parameters before calling acquire token \(error)"
+            self.updateLoggingText(text: "Unable to construct parameters before calling acquire token \(error)")
         }
     }
     
@@ -195,7 +195,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             guard let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kSignupOrSigninPolicy) else {
-                self.loggingText.text = "There is no account available!"
+                self.updateLoggingText(text: "There is no account available!")
                 return
             }
             
@@ -223,38 +223,38 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             self.application.acquireToken(with: parameters) { (result, error) in
                                 if let result = result {
                                     self.accessToken = result.accessToken
-                                    self.loggingText.text = "Access token is \(self.accessToken ?? "empty")"
+                                    self.updateLoggingText(text: "Access token is \(self.accessToken ?? "empty")")
                                     
                                 } else  {
-                                    self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                                    self.updateLoggingText(text: "Could not acquire new token: \(error ?? "No error informarion" as! Error)")
                                 }
                             }
                             return
                         }
                     }
                     
-                    self.loggingText.text = "Could not acquire token: \(error)"
+                    self.updateLoggingText(text: "Could not acquire token: \(error)")
                     return
                 }
                 
                 guard let result = result else {
                     
-                    self.loggingText.text = "Could not acquire token: No result returned"
+                    self.updateLoggingText(text: "Could not acquire token: No result returned")
                     return
                 }
                 
                 self.accessToken = result.accessToken
-                self.loggingText.text = "Refreshing token silently"
-                self.loggingText.text = "Refreshed access token is \(self.accessToken ?? "empty")"
+                self.updateLoggingText(text: "Refreshing token silently")
+                self.updateLoggingText(text: "Refreshed access token is \(self.accessToken ?? "empty")")
             }
         } catch {
-            self.loggingText.text = "Unable to construct parameters before calling acquire token \(error)"
+            self.updateLoggingText(text: "Unable to construct parameters before calling acquire token \(error)")
         }
     }
     
     @IBAction func callApi(_ sender: UIButton) {
         guard let accessToken = self.accessToken else {
-            self.loggingText.text = "Operation failed because could not find an access token!"
+            self.updateLoggingText(text: "Operation failed because could not find an access token!")
             return
         }
         
@@ -266,18 +266,18 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         
         urlSession.dataTask(with: request) { data, response, error in
             guard let validData = data else {
-                self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+                self.updateLoggingText(text: "Could not call API: \(error ?? "No error informarion" as! Error)")
                 return
             }
             
             let result = try? JSONSerialization.jsonObject(with: validData, options: [])
             
             guard let validResult = result as? [String: Any] else {
-                self.loggingText.text = "Nothing returned from API"
+                self.updateLoggingText(text: "Nothing returned from API")
                 return
             }
             
-            self.loggingText.text = "API response: \(validResult.debugDescription)"
+            self.updateLoggingText(text: "API response: \(validResult.debugDescription)")
             }.resume()
     }
     
@@ -294,7 +294,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             if let accountToRemove = thisAccount {
                 try application.remove(accountToRemove)
             } else {
-                self.loggingText.text = "There is no account to signing out!"
+                self.updateLoggingText(text: "There is no account to signing out!")
             }
             
             self.signoutButton.isEnabled = false
@@ -303,7 +303,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             self.refreshTokenButton.isEnabled = false
             
         } catch  {
-            self.loggingText.text = "Received error signing out: \(error)"
+            self.updateLoggingText(text: "Received error signing out: \(error)")
         }
     }
     
@@ -353,6 +353,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                           userInfo: ["errorDescription": "Unable to create authority URL!"])
         }
         return try MSALB2CAuthority(url: authorityURL)
+    }
+    
+    func updateLoggingText(text: String) {
+        DispatchQueue.main.async{
+            self.loggingText.text = text
+        }
     }
 }
 
