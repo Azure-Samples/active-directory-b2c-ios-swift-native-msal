@@ -80,7 +80,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         print("Received callback!")
         
-        MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApplication!)
+        guard let sourceApp = sourceApplication else { return false }
+        
+        MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApp)
         
         return true
     }
