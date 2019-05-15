@@ -46,7 +46,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     var application: MSALPublicClientApplication!
     
-    var accessToken = String()
+    var accessToken: String?
     
     @IBOutlet weak var loggingText: UITextView!
     @IBOutlet weak var signoutButton: UIButton!
@@ -62,8 +62,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
              MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             
+             Redirect uri will be constucted automatically in the form of "msauth.<your-bundle-id-here>://auth" if not provided.
+             The scheme part, i.e. "msauth.<your-bundle-id-here>", needs to be registered in the info.plist of the project
              */
             
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID)
@@ -92,12 +92,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
             
-            let authority = try self.getAuthority(policy: self.kSignupOrSigninPolicy)
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             
             /**
-             Acquire a token for a new user using interactive authentication
+             Acquire a token for a new account using interactive authentication
              
-             - forScopes: Permissions you want included in the access token received
+             - scopes: Permissions you want included in the access token received
              in the result in the completionBlock. Not all scopes are
              gauranteed to be included in the access token returned.
              - completionBlock: The completion block that will be called when the authentication
@@ -107,9 +107,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
             parameters.authority = authority
             application.acquireToken(with: parameters) { (result, error) in
-                if  error == nil {
-                    self.accessToken = (result?.accessToken)!
-                    self.loggingText.text = "Access token is \(self.accessToken)"
+                if let result = result {
+                    self.accessToken = result.accessToken
+                    self.loggingText.text = "Access token is \(self.accessToken ?? "Empty")"
                     self.signoutButton.isEnabled = true
                     self.callGraphApiButton.isEnabled = true
                     self.editProfileButton.isEnabled = true
@@ -137,12 +137,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
             
-            let authority = try self.getAuthority(policy: self.kEditProfilePolicy)
+            let authority = try self.getAuthority(forPolicy: self.kEditProfilePolicy)
             
             /**
              Acquire a token for a new account using interactive authentication
              
-             - forScopes: Permissions you want included in the access token received
+             - scopes: Permissions you want included in the access token received
              in the result in the completionBlock. Not all scopes are
              gauranteed to be included in the access token returned.
              - completionBlock: The completion block that will be called when the authentication
@@ -155,12 +155,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             parameters.account = thisAccount
             
             application.acquireToken(with: parameters) { (result, error) in
-                if error == nil {
-                    self.loggingText.text = "Successfully edited profile"
-                    
-                    
+                if let error = error {
+                    self.loggingText.text = "Could not edit profile: \(error)"
                 } else {
-                    self.loggingText.text = "Could not edit profile: \(error ?? "No error informarion" as! Error)"
+                    self.loggingText.text = "Successfully edited profile"
                 }
             }
         } catch {
@@ -181,16 +179,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              */
             
-            let authority = try self.getAuthority(policy: self.kSignupOrSigninPolicy)
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             
             /**
              
-             Acquire a token for an existing user silently
+             Acquire a token for an existing account silently
              
-             - forScopes: Permissions you want included in the access token received
+             - scopes: Permissions you want included in the access token received
              in the result in the completionBlock. Not all scopes are
              gauranteed to be included in the access token returned.
-             - User: A user object that we retrieved from the application object before that the
+             - account: An account object that we retrieved from the application object before that the
              authentication flow will be locked down to.
              - completionBlock: The completion block that will be called when the authentication
              flow completes, or encounters an error.
@@ -204,31 +202,50 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             let parameters = MSALSilentTokenParameters(scopes: kScopes, account:thisAccount)
             parameters.authority = authority
             self.application.acquireTokenSilent(with: parameters) { (result, error) in
-                if error == nil {
-                    self.accessToken = (result?.accessToken)!
-                    self.loggingText.text = "Refreshing token silently"
-                    self.loggingText.text = "Refreshed Access token is \(self.accessToken)"
+                if let error = error {
                     
-                }  else if ((error! as NSError).code == MSALError.interactionRequired.rawValue) {
+                    let nsError = error as NSError
                     
-                    // Notice we supply the user here. This ensures we acquire token for the same user
-                    // as we originally authenticated.
+                    // interactionRequired means we need to ask the user to sign-in. This usually happens
+                    // when the user's Refresh Token is expired or if the user has changed their password
+                    // among other possible reasons.
                     
-                    let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes)
-                    parameters.account = thisAccount
-                    
-                    self.application.acquireToken(with: parameters) { (result, error) in
-                        if error == nil {
-                            self.accessToken = (result?.accessToken)!
-                            self.loggingText.text = "Access token is \(self.accessToken)"
+                    if (nsError.domain == MSALErrorDomain) {
+                        
+                        if (nsError.code == MSALError.interactionRequired.rawValue) {
                             
-                        } else  {
-                            self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                            // Notice we supply the account here. This ensures we acquire token for the same account
+                            // as we originally authenticated.
+                            
+                            let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes)
+                            parameters.account = thisAccount
+                            
+                            self.application.acquireToken(with: parameters) { (result, error) in
+                                if let result = result {
+                                    self.accessToken = result.accessToken
+                                    self.loggingText.text = "Access token is \(self.accessToken ?? "empty")"
+                                    
+                                } else  {
+                                    self.loggingText.text = "Could not acquire new token: \(error ?? "No error informarion" as! Error)"
+                                }
+                            }
+                            return
                         }
                     }
-                } else {
-                    self.loggingText.text = "Could not acquire token: \(error ?? "No error informarion" as! Error)"
+                    
+                    self.loggingText.text = "Could not acquire token: \(error)"
+                    return
                 }
+                
+                guard let result = result else {
+                    
+                    self.loggingText.text = "Could not acquire token: No result returned"
+                    return
+                }
+                
+                self.accessToken = result.accessToken
+                self.loggingText.text = "Refreshing token silently"
+                self.loggingText.text = "Refreshed access token is \(self.accessToken ?? "empty")"
             }
         } catch {
             self.loggingText.text = "Unable to construct parameters before calling acquire token \(error)"
@@ -236,28 +253,32 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     @IBAction func callApi(_ sender: UIButton) {
-        
+        guard let accessToken = self.accessToken else {
+            self.loggingText.text = "Operation failed because could not find an access token!"
+            return
+        }
         
         let sessionConfig = URLSessionConfiguration.default
         let url = URL(string: self.kGraphURI)
         var request = URLRequest(url: url!)
-        request.setValue("Bearer \(self.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
         
         urlSession.dataTask(with: request) { data, response, error in
-            
-            if error == nil {
-                let result = try? JSONSerialization.jsonObject(with: data!, options: [])
-                if result != nil {
-                    self.loggingText.text = "API response: \(result.debugDescription)"
-                } else {
-                    self.loggingText.text = "Nothing returned from API"
-                }
-            } else {
+            guard let validData = data else {
                 self.loggingText.text = "Could not call API: \(error ?? "No error informarion" as! Error)"
+                return
             }
+            
+            let result = try? JSONSerialization.jsonObject(with: validData, options: [])
+            
+            guard let validResult = result as? [String: Any] else {
+                self.loggingText.text = "Nothing returned from API"
+                return
+            }
+            
+            self.loggingText.text = "API response: \(validResult.debugDescription)"
             }.resume()
-        
     }
     
     @IBAction func signoutButton(_ sender: UIButton) {
@@ -272,6 +293,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             if let accountToRemove = thisAccount {
                 try application.remove(accountToRemove)
+            } else {
+                self.loggingText.text = "There is no account to signing out!"
             }
             
             self.signoutButton.isEnabled = false
@@ -291,7 +314,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     override func viewWillAppear(_ animated: Bool) {
         
-        if self.accessToken.isEmpty {
+        if self.accessToken == nil {
             signoutButton.isEnabled = false
             callGraphApiButton.isEnabled = false
             editProfileButton.isEnabled = false
@@ -299,11 +322,16 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    func getAccountByPolicy (withAccounts: [MSALAccount], policy: String) throws -> MSALAccount? {
+    func getAccountByPolicy (withAccounts accounts: [MSALAccount], policy: String) throws -> MSALAccount? {
         
-        for account in withAccounts {
-            if (account.homeAccountId != nil && account.homeAccountId!.objectId!.hasSuffix(policy.lowercased())) {
-                return account
+        for account in accounts {
+            // This is a single account sample, so we only check the suffic part of the object id,
+            // where object id is in the form of <object id>-<policy>.
+            // For multi-account apps, the whole object id needs to be checked.
+            if let homeAccountId = account.homeAccountId, let objectId = homeAccountId.objectId {
+                if objectId.hasSuffix(policy.lowercased()) {
+                    return account
+                }
             }
         }
         return nil
@@ -318,7 +346,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      tenant, such as contoso.onmicrosoft.com), and `<policy>` is the policy you wish to
      use for the current user flow.
      */
-    func getAuthority(policy: String) throws -> MSALB2CAuthority {
+    func getAuthority(forPolicy policy: String) throws -> MSALB2CAuthority {
         guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kTenantName, policy)) else {
             throw NSError(domain: "SomeDomain",
                           code: 1,

@@ -22,8 +22,8 @@ The MSAL preview library for iOS and macOS gives your app the ability to begin u
 ```Swift
 do {
     // Create an instance of MSALPublicClientApplication with proper config
-    let authority = try MSALB2CAuthority.init(url: URL(string:kAuthority)!)
-    let pcaConfig = MSALPublicClientApplicationConfig.init(clientId: <your-client-id-here>, redirectUri: nil, authority: authority)
+    let authority = try MSALB2CAuthority(url: URL(string:kAuthority)!)
+    let pcaConfig = MSALPublicClientApplicationConfig(clientId: <your-client-id-here>, redirectUri: nil, authority: authority)
     let application = try MSALPublicClientApplication(configuration: pcaConfig)
     
     application.acquireToken(forScopes: kScopes) { (result, error) in
