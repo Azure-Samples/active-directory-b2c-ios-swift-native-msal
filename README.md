@@ -1,11 +1,15 @@
 ---
-Services: active-directory-b2c
-platforms: iOS
-author: brandwe
+languages:
+- swift
+page_type: sample
+description: "The MSAL preview library for iOS and macOS gives your app the ability to begin using the Microsoft Cloud by supporting Azure B2C."
+products:
+- azure
+- azure-active-directory
+urlFragment: microsoft-authentication-library-b2c-ios
 ---
 
-Microsoft Authentication Library B2C Sample for Apple iOS in Swift
-=====================================
+# Microsoft Authentication Library B2C Sample for Apple iOS in Swift
 
 | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-get-started)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-objc) | [Docs](https://aka.ms/aadb2c) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
