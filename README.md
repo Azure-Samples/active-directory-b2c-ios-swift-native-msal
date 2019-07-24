@@ -23,7 +23,7 @@ The MSAL preview library for iOS and macOS gives your app the ability to begin u
 
 ## Example
 
-```Swift
+```swift
 do {
     let application = try MSALPublicClientApplication.init(clientId: <your-client-id-here> authority: kAuthority)
     application.acquireToken(forScopes: kScopes) { (result, error) in
@@ -45,7 +45,7 @@ do {
 
 ## App Registration
 
-You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-get-started). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
+You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/azure/active-directory-b2c/active-directory-b2c-get-started). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
 
 
 ## Installation
