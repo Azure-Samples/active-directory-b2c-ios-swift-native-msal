@@ -66,7 +66,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              The scheme part, i.e. "msal<your-client-id-here>", needs to be registered in the info.plist of the project
              */
             
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID)
+            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
+            
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
             self.updateLoggingText(text: "Unable to create application \(error)")
@@ -104,7 +106,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
+            let webViewParameters = MSALWebviewParameters(parentViewController: self)
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
             parameters.authority = authority
             application.acquireToken(with: parameters) { (result, error) in
                 if let result = result {
@@ -150,7 +153,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kEditProfilePolicy)
-            let parameters = MSALInteractiveTokenParameters(scopes: kScopes)
+            let webViewParameters = MSALWebviewParameters(parentViewController: self)
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
             parameters.authority = authority
             parameters.account = thisAccount
             
@@ -167,6 +171,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
     
     @IBAction func refreshToken(_ sender: UIButton) {
+        
         do {
             /**
              
@@ -217,7 +222,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             // Notice we supply the account here. This ensures we acquire token for the same account
                             // as we originally authenticated.
                             
-                            let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes)
+                            let webviewParameters = MSALWebviewParameters(parentViewController: self)
+                            let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes, webviewParameters: webviewParameters)
                             parameters.account = thisAccount
                             
                             self.application.acquireToken(with: parameters) { (result, error) in
@@ -259,10 +265,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
         
         let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 30
         let url = URL(string: self.kGraphURI)
         var request = URLRequest(url: url!)
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         let urlSession = URLSession(configuration: sessionConfig, delegate: self, delegateQueue: OperationQueue.main)
+        
+        self.updateLoggingText(text: "Calling the API....")
         
         urlSession.dataTask(with: request) { data, response, error in
             guard let validData = data else {
@@ -301,6 +310,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             self.callGraphApiButton.isEnabled = false
             self.editProfileButton.isEnabled = false
             self.refreshTokenButton.isEnabled = false
+            
+            self.updateLoggingText(text: "Signed out")
             
         } catch  {
             self.updateLoggingText(text: "Received error signing out: \(error)")

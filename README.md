@@ -14,7 +14,7 @@ urlFragment: microsoft-authentication-library-b2c-ios
 | [Getting Started](https://docs.microsoft.com/azure/active-directory-b2c/active-directory-b2c-get-started)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-objc) | [Docs](https://aka.ms/aadb2c) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
 
-The MSAL preview library for iOS and macOS gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Azure B2C](https://azure.microsoft.com/en-us/services/active-directory-b2c/) using industry standard OAuth2 and OpenID Connect. This sample demonstrates all the normal lifecycles your application should experience, including:
+The MSAL library for iOS and macOS gives your app the ability to begin using the [Microsoft identity platform](https://aka.ms/aaddev) by supporting [Azure B2C](https://azure.microsoft.com/en-us/services/active-directory-b2c/) using industry standard OAuth2 and OpenID Connect. This sample demonstrates all the normal lifecycles your application should experience, including:
 
 * How to get a token
 * How to refresh a token
@@ -24,27 +24,32 @@ The MSAL preview library for iOS and macOS gives your app the ability to begin u
 ## Example
 
 ```swift
-do {
-    // Create an instance of MSALPublicClientApplication with proper config
-    let authority = try MSALB2CAuthority(url: URL(string:kAuthority)!)
-    let pcaConfig = MSALPublicClientApplicationConfig(clientId: <your-client-id-here>, redirectUri: nil, authority: authority)
-    let application = try MSALPublicClientApplication(configuration: pcaConfig)
-    
-    application.acquireToken(forScopes: kScopes) { (result, error) in
-    DispatchQueue.main.async {
-    if result != nil {
-    // Set up your application for the user
-        } else {
-            print(error)
+		do {
+            // Create an instance of MSALPublicClientApplication with proper config
+            let authority = try MSALB2CAuthority(url: URL(string: "<your-authority-here>")!)
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>", redirectUri: nil, authority: authority)
+            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+            
+            let viewController = self /*replace with your main presentation controller here */
+            let webViewParameters = MSALWebviewParameters(parentViewController: viewController)
+            let interactiveParameters = MSALInteractiveTokenParameters(scopes: ["<enter-your-scope-here>"], webviewParameters: webViewParameters)
+            
+            application.acquireToken(with: interactiveParameters) { (result, error) in
+                
+                guard let result = result else {
+                    print(error!) /* MSAL token acquisition failed, check error information */
+                    return
+                }
+                
+                let accessToken = result.accessToken
+                let account = result.account
+                /* MSAL token acquisition succeeded, use access token or check account */
+                
+            }
         }
-      }
-    }
-}
-
         catch {
-            print(error)
+            print(error) /* MSALPublicClientApplication creation failed, check error information */
         }
-    }
 ```
 
 ## App Registration
@@ -60,7 +65,7 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 
 1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
 1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
-1. Run `carthage bootstrap`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
+1. Run `carthage bootstrap --platform iOS`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
 1. On your application targets’ “General” settings tab, in the “Linked Frameworks and Libraries” section, drag and drop the `MSAL.framework` from the `Carthage/Build` folder on disk.
 1. On your application targets’ “Build Phases” settings tab, click the “+” icon and choose “New Run Script Phase”. Create a Run Script in which you specify your shell (ex: `/bin/sh`), add the following contents to the script area below the shell:
 
@@ -124,9 +129,16 @@ To provide a recommendation, visit our [User Voice page](https://feedback.azure.
 
 ## Contribute
 
-We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](Contributing.md) for more information.
+We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. 
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
+## Security Library
+
+This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org) so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.x) ensures you get the latest security and feature enhanements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
+
+## Security Reporting
+
+If you find a security issue with our libraries or services please report it to [secure@microsoft.com](mailto:secure@microsoft.com) with as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bounty](http://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly upon receiving the information. We encourage you to get notifications of when security incidents occur by visiting [this page](https://technet.microsoft.com/en-us/security/dd252948) and subscribing to Security Advisory Alerts.
 
 Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
