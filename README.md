@@ -24,32 +24,32 @@ The MSAL library for iOS and macOS gives your app the ability to begin using the
 ## Example
 
 ```swift
-		do {
-            // Create an instance of MSALPublicClientApplication with proper config
-            let authority = try MSALB2CAuthority(url: URL(string: "<your-authority-here>")!)
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>", redirectUri: nil, authority: authority)
-            let application = try MSALPublicClientApplication(configuration: pcaConfig)
+do {
+	// Create an instance of MSALPublicClientApplication with proper config
+	let authority = try MSALB2CAuthority(url: URL(string: "<your-authority-here>")!)
+	let pcaConfig = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>", redirectUri: nil, authority: authority)
+	let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
-            let viewController = self /*replace with your main presentation controller here */
-            let webViewParameters = MSALWebviewParameters(parentViewController: viewController)
-            let interactiveParameters = MSALInteractiveTokenParameters(scopes: ["<enter-your-scope-here>"], webviewParameters: webViewParameters)
+	let viewController = self /*replace with your main presentation controller here */
+	let webViewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let interactiveParameters = MSALInteractiveTokenParameters(scopes: ["<enter-your-scope-here>"], webviewParameters: webViewParameters)
             
-            application.acquireToken(with: interactiveParameters) { (result, error) in
+	application.acquireToken(with: interactiveParameters) { (result, error) in
                 
-                guard let result = result else {
-                    print(error!) /* MSAL token acquisition failed, check error information */
-                    return
+		guard let result = result else {
+			print(error!) /* MSAL token acquisition failed, check error information */
+			return
                 }
                 
                 let accessToken = result.accessToken
                 let account = result.account
                 /* MSAL token acquisition succeeded, use access token or check account */
                 
-            }
-        }
-        catch {
-            print(error) /* MSALPublicClientApplication creation failed, check error information */
-        }
+	}
+}
+catch {
+	print(error) /* MSALPublicClientApplication creation failed, check error information */
+}
 ```
 
 ## App Registration
