@@ -68,6 +68,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             
+            // Provide configuration for MSALPublicClientApplication
+            // MSAL will use default redirect uri when you provide nil
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
@@ -108,18 +110,21 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             let webViewParameters = MSALWebviewParameters(parentViewController: self)
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
+            parameters.promptType = .selectAccount
             parameters.authority = authority
             application.acquireToken(with: parameters) { (result, error) in
-                if let result = result {
-                    self.accessToken = result.accessToken
-                    self.updateLoggingText(text: "Access token is \(self.accessToken ?? "Empty")")
-                    self.signoutButton.isEnabled = true
-                    self.callGraphApiButton.isEnabled = true
-                    self.editProfileButton.isEnabled = true
-                    self.refreshTokenButton.isEnabled = true
-                } else {
+                
+                guard let result = result else {
                     self.updateLoggingText(text: "Could not acquire token: \(error ?? "No error informarion" as! Error)")
+                    return
                 }
+                
+                self.accessToken = result.accessToken
+                self.updateLoggingText(text: "Access token is \(self.accessToken ?? "Empty")")
+                self.signoutButton.isEnabled = true
+                self.callGraphApiButton.isEnabled = true
+                self.editProfileButton.isEnabled = true
+                self.refreshTokenButton.isEnabled = true
             }
         } catch {
             self.updateLoggingText(text: "Unable to create authority \(error)")
@@ -227,13 +232,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             parameters.account = thisAccount
                             
                             self.application.acquireToken(with: parameters) { (result, error) in
-                                if let result = result {
-                                    self.accessToken = result.accessToken
-                                    self.updateLoggingText(text: "Access token is \(self.accessToken ?? "empty")")
-                                    
-                                } else  {
+                                
+                                guard let result = result else {
                                     self.updateLoggingText(text: "Could not acquire new token: \(error ?? "No error informarion" as! Error)")
+                                    return
                                 }
+                                
+                                self.accessToken = result.accessToken
+                                self.updateLoggingText(text: "Access token is \(self.accessToken ?? "empty")")
                             }
                             return
                         }
