@@ -54,7 +54,7 @@ catch {
 
 ## App Registration
 
-You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/en-us/azure/active-directory-b2c/tutorial-register-applications?tabs=applications). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
+You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-register-applications?tabs=applications). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
 
 
 ## Installation
