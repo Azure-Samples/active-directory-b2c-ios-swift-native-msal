@@ -34,6 +34,7 @@ import MSAL
 class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
     
     let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
+    let kAuthorityHostName = "fabrikamb2c.b2clogin.com" // Your authority host name
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
     let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
@@ -42,7 +43,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
     
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
-    let kEndpoint = "https://login.microsoftonline.com/tfp/%@/%@"
+    let kEndpoint = "https://%@/tfp/%@/%@"
     
     var application: MSALPublicClientApplication!
     
@@ -364,7 +365,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
      use for the current user flow.
      */
     func getAuthority(forPolicy policy: String) throws -> MSALB2CAuthority {
-        guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kTenantName, policy)) else {
+        guard let authorityURL = URL(string: String(format: self.kEndpoint, self.kAuthorityHostName, self.kTenantName, policy)) else {
             throw NSError(domain: "SomeDomain",
                           code: 1,
                           userInfo: ["errorDescription": "Unable to create authority URL!"])
