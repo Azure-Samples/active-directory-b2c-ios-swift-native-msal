@@ -69,9 +69,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             
             let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
             
+            let b2cAuthority = try MSALB2CAuthority(url: authority)
+
             // Provide configuration for MSALPublicClientApplication
             // MSAL will use default redirect uri when you provide nil
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: authority)
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: b2cAuthority)
+            pcaConfig.knownAuthorities = b2cAuthority
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
             self.updateLoggingText(text: "Unable to create application \(error)")
