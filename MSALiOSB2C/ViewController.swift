@@ -67,14 +67,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              The scheme part, i.e. "msal<your-client-id-here>", needs to be registered in the info.plist of the project
              */
             
-            let authority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
-            
-            let b2cAuthority = try MSALB2CAuthority(url: authority)
+            let siginPolicyAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
+            let editProfileAuthority = try self.getAuthority(forPolicy: self.kEditProfilePolicy)
 
             // Provide configuration for MSALPublicClientApplication
             // MSAL will use default redirect uri when you provide nil
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: b2cAuthority)
-            pcaConfig.knownAuthorities = b2cAuthority
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: siginPolicyAuthority)
+            pcaConfig.knownAuthorities = [siginPolicyAuthority, editProfileAuthority]
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
             self.updateLoggingText(text: "Unable to create application \(error)")
