@@ -66,7 +66,7 @@ From terminal navigate to the directory where the podfile is located
 ```
 $ pod install
 ...
-$ open MSALiOS.xcworkspace
+$ open MSALiOSB2C.xcworkspace
 ```
 
 ## Configure your application
