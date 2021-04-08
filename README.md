@@ -93,12 +93,14 @@ $ open MSALiOSB2C.xcworkspace
 In the `ViewControler.swift` file, update the variables at the top of this file with the information for your tenant.
 
 ```swift
-    let kTenantName = "<tenant>.onmicrosoft.com" // Your tenant name
-    let kClientID = "<your-client-id>" // Your client ID from the portal when you created your application
-    let kSignupOrSigninPolicy = "<your-signin-policy>" // Your signup and sign-in policy you created in the portal
-    let kEditProfilePolicy = "<your-edit-profile-policy>" // Your edit policy you created in the portal
-    let kGraphURI = "<Your backend API>" // This is your backend API that you've configured to accept your app's tokens
-    let kScopes: [String] = ["<Your backend API>/demo.read"] // This is a scope that you've configured your backend API to look for.
+    let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
+    let kAuthorityHostName = "fabrikamb2c.b2clogin.com" // Your authority host name
+    let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
+    let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
+    let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
+    let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
+    let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
+    let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
 ```
 
 
