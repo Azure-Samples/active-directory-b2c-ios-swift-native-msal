@@ -1,7 +1,7 @@
 PODS:
-  - MSAL (1.1.13):
-    - MSAL/app-lib (= 1.1.13)
-  - MSAL/app-lib (1.1.13)
+  - MSAL (1.1.18):
+    - MSAL/app-lib (= 1.1.18)
+  - MSAL/app-lib (1.1.18)
 
 DEPENDENCIES:
   - MSAL
@@ -11,7 +11,7 @@ SPEC REPOS:
     - MSAL
 
 SPEC CHECKSUMS:
-  MSAL: 291d1cfc8d095a6bfe669e4beda2c5be6774a4ff
+  MSAL: 048eea7160a7b8960a2359ac9135e098ec58ad34
 
 PODFILE CHECKSUM: a752ddf8f698358c8de41285e54376f7152adc6d
 
