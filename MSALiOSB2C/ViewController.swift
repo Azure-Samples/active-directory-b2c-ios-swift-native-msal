@@ -36,6 +36,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
     let kAuthorityHostName = "fabrikamb2c.b2clogin.com" // Your authority host name
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
+    let kRedirectUri = "msauth.com.microsoft.identity.client.sample.MSALiOSB2C://auth" // Your application's redirect URI
     let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
     let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
@@ -63,8 +64,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              
              Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
              MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             The scheme part, i.e. "msal<your-client-id-here>", needs to be registered in the info.plist of the project
              */
             
             let siginPolicyAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
@@ -72,7 +71,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
 
             // Provide configuration for MSALPublicClientApplication
             // MSAL will use default redirect uri when you provide nil
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: siginPolicyAuthority)
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: kRedirectUri, authority: siginPolicyAuthority)
             pcaConfig.knownAuthorities = [siginPolicyAuthority, editProfileAuthority]
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {

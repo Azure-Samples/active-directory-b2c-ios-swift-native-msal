@@ -54,14 +54,14 @@ catch {
 
 ## App Registration
 
-You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-register-applications?tabs=applications). Make sure you make note of your `client ID`, and the name of the policies you create. Once done, you will need add the redirect URI of `msal<your-client-id-here>://auth`.
+You will need to have a B2C client application registered with Microsoft. Follow [the instructions here](https://docs.microsoft.com/azure/active-directory-b2c/tutorial-register-applications?tabs=applications). Set the redirect URI to: `msauth.com.microsoft.identity.client.sample.MSALiOSB2C://auth`.
 
 
 ## Installation
 
 We use [Carthage](https://github.com/Carthage/Carthage) for package management during the preview period of MSAL. This package manager integrates very nicely with XCode while maintaining our ability to make changes to the library. The sample is set up to use Carthage.
 
-##### If you're building for iOS, tvOS, or watchOS
+### If you're building for iOS, tvOS, or watchOS
 
 1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
 1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
@@ -86,38 +86,38 @@ When archiving your application for submission to the App Store or TestFlight, X
 
 ## Configure your application
 
-1. Add your application's redirect URI scheme to added in the portal to your `info.plist` file. It will be in the format of `msal<client-id>`
-```xml
+1. Add your application's redirect URI scheme to added in the portal to your `info.plist` file. 
+
+    ```xml
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Editor</string>
-            <key>CFBundleURLName</key>
-            <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>msalyour-client-id-here</string>
+                <string>msauth.com.microsoft.identity.client.sample.MSALiOSB2C</string>
             </array>
         </dict>
     </array>
-```
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>msauthv2</string>
+        <string>msauthv3</string>
+    </array>
+    ```
 
 2. Configure your application defaults
 
 In the `ViewControler.swift` file, update the variables at the top of this file with the information for your tenant.
-
-```swift
+    
+    ```swift
     let kTenantName = "<tenant>.onmicrosoft.com" // Your tenant name
     let kClientID = "<your-client-id>" // Your client ID from the portal when you created your application
+    let kRedirectUri = "msauth.com.microsoft.identity.client.sample.MSALiOSB2C://auth" // Your application's redirect URI
     let kSignupOrSigninPolicy = "<your-signin-policy>" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "<your-edit-profile-policy>" // Your edit policy you created in the portal
     let kGraphURI = "<Your backend API>" // This is your backend API that you've configured to accept your app's tokens
     let kScopes: [String] = ["<Your backend API>/demo.read"] // This is a scope that you've configured your backend API to look for.
-```
-
-
-
+    ```
 
 ## Community Help and Support
 
