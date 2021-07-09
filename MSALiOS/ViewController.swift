@@ -45,9 +45,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     // DO NOT CHANGE - This is the format of OIDC Token and Authorization endpoints for Azure AD B2C.
     let kEndpoint = "https://%@/tfp/%@/%@"
     
-    var application: MSALPublicClientApplication!
-    
+    var applicationContext: MSALPublicClientApplication!
     var accessToken: String?
+    var webViewParamaters : MSALWebviewParameters?
+
     
     // UI elements
     var loggingText: UITextView!
@@ -80,11 +81,17 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: kRedirectUri, authority: siginPolicyAuthority)
             pcaConfig.knownAuthorities = [siginPolicyAuthority, editProfileAuthority]
             
-            self.application = try MSALPublicClientApplication(configuration: pcaConfig)
+            self.applicationContext = try MSALPublicClientApplication(configuration: pcaConfig)
+            self.initWebViewParams()
+            
         } catch {
             self.updateLoggingText(text: "Unable to create application \(error)")
         }
 
+    }
+    
+    func initWebViewParams() {
+        self.webViewParamaters = MSALWebviewParameters(authPresentationViewController: self)
     }
     
     /**
@@ -118,14 +125,13 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let webViewParameters = MSALWebviewParameters(parentViewController: self)
-            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: self.webViewParamaters!)
             parameters.promptType = .selectAccount
             parameters.authority = authority
             //parameters.webviewType = .wkWebView
         
             
-            application.acquireToken(with: parameters) { (result, error) in
+            applicationContext.acquireToken(with: parameters) { (result, error) in
                 
                 guard let result = result else {
                     self.updateLoggingText(text: "Could not acquire token: \(error ?? "No error informarion" as! Error)")
@@ -170,13 +176,12 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kEditProfilePolicy)
-            let webViewParameters = MSALWebviewParameters(parentViewController: self)
-            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: applicationContext.allAccounts(), policy: kEditProfilePolicy)
+            let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: self.webViewParamaters!)
             parameters.authority = authority
             parameters.account = thisAccount
             
-            application.acquireToken(with: parameters) { (result, error) in
+            applicationContext.acquireToken(with: parameters) { (result, error) in
                 if let error = error {
                     self.updateLoggingText(text: "Could not edit profile: \(error)")
                 } else {
@@ -217,14 +222,14 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            guard let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kSignupOrSigninPolicy) else {
+            guard let thisAccount = try self.getAccountByPolicy(withAccounts: applicationContext.allAccounts(), policy: kSignupOrSigninPolicy) else {
                 self.updateLoggingText(text: "There is no account available!")
                 return
             }
             
             let parameters = MSALSilentTokenParameters(scopes: kScopes, account:thisAccount)
             parameters.authority = authority
-            self.application.acquireTokenSilent(with: parameters) { (result, error) in
+            self.applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
                 if let error = error {
                     
                     let nsError = error as NSError
@@ -240,11 +245,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             // Notice we supply the account here. This ensures we acquire token for the same account
                             // as we originally authenticated.
                             
-                            let webviewParameters = MSALWebviewParameters(parentViewController: self)
-                            let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes, webviewParameters: webviewParameters)
+                            let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes, webviewParameters: self.webViewParamaters!)
                             parameters.account = thisAccount
                             
-                            self.application.acquireToken(with: parameters) { (result, error) in
+                            self.applicationContext.acquireToken(with: parameters) { (result, error) in
                                 
                                 guard let result = result else {
                                     self.updateLoggingText(text: "Could not acquire new token: \(error ?? "No error informarion" as! Error)")
@@ -317,10 +321,10 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              - account:    The account to remove from the cache
              */
             
-            let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kSignupOrSigninPolicy)
+            let thisAccount = try self.getAccountByPolicy(withAccounts: applicationContext.allAccounts(), policy: kSignupOrSigninPolicy)
             
             if let accountToRemove = thisAccount {
-                try application.remove(accountToRemove)
+                try applicationContext.remove(accountToRemove)
             } else {
                 self.updateLoggingText(text: "There is no account to signing out!")
             }
@@ -391,7 +395,6 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
 }
-
 
 
 // Yoel: UI Helpers
