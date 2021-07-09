@@ -30,12 +30,12 @@ import MSAL
 
 /// 😃 A View Controller that will respond to the events of the Storyboard.
 
-
-class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate  {
+class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate {
     
     let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
     let kAuthorityHostName = "fabrikamb2c.b2clogin.com" // Your authority host name
     let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
+    let kRedirectUri = "msauth.com.microsoft.identitysample.MSALiOS://auth" // Your application's redirect URI
     let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
     let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
     let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
@@ -49,22 +49,27 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     
     var accessToken: String?
     
-    @IBOutlet weak var loggingText: UITextView!
-    @IBOutlet weak var signoutButton: UIButton!
-    @IBOutlet weak var callGraphApiButton: UIButton!
-    @IBOutlet weak var editProfileButton: UIButton!
-    @IBOutlet weak var refreshTokenButton: UIButton!
+    // UI elements
+    var loggingText: UITextView!
+    var authorizationButton: UIButton!
+    var signOutButton: UIButton!
+    var callGraphButton: UIButton!
+    var usernameLabel: UILabel!
+    var editProfileButton: UIButton!
+    var refreshTokenButton: UIButton!
+    
     
     override func viewDidLoad() {
+
         super.viewDidLoad()
+
+        initUI()
         
         do {
             /**
              
              Initialize a MSALPublicClientApplication with a MSALPublicClientApplicationConfig.
              MSALPublicClientApplicationConfig can be initialized with client id, redirect uri and authority.
-             Redirect uri will be constucted automatically in the form of "msal<your-client-id-here>://auth" if not provided.
-             The scheme part, i.e. "msal<your-client-id-here>", needs to be registered in the info.plist of the project
              */
             
             let siginPolicyAuthority = try self.getAuthority(forPolicy: self.kSignupOrSigninPolicy)
@@ -72,21 +77,23 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
 
             // Provide configuration for MSALPublicClientApplication
             // MSAL will use default redirect uri when you provide nil
-            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: nil, authority: siginPolicyAuthority)
+            let pcaConfig = MSALPublicClientApplicationConfig(clientId: kClientID, redirectUri: kRedirectUri, authority: siginPolicyAuthority)
             pcaConfig.knownAuthorities = [siginPolicyAuthority, editProfileAuthority]
+            
             self.application = try MSALPublicClientApplication(configuration: pcaConfig)
         } catch {
             self.updateLoggingText(text: "Unable to create application \(error)")
         }
+
     }
     
     /**
      This button will invoke the authorization flow and send the policy specified to the B2C server.
-     Here we are using the `kSignupOrSignInPolicy` to sign the user in to the app. We will store this 
+     Here we are using the `kSignupOrSignInPolicy` to sign the user in to the app. We will store this
      accessToken for subsequent calls.
      */
     
-    @IBAction func authorizationButton(_ sender: UIButton) {
+    @objc func authorizationButton(_ sender: UIButton) {
         do {
             /**
              
@@ -115,6 +122,9 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
             parameters.promptType = .selectAccount
             parameters.authority = authority
+            //parameters.webviewType = .wkWebView
+        
+            
             application.acquireToken(with: parameters) { (result, error) in
                 
                 guard let result = result else {
@@ -124,8 +134,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                 
                 self.accessToken = result.accessToken
                 self.updateLoggingText(text: "Access token is \(self.accessToken ?? "Empty")")
-                self.signoutButton.isEnabled = true
-                self.callGraphApiButton.isEnabled = true
+                self.signOutButton.isEnabled = true
+                self.callGraphButton.isEnabled = true
                 self.editProfileButton.isEnabled = true
                 self.refreshTokenButton.isEnabled = true
             }
@@ -134,7 +144,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    @IBAction func editProfile(_ sender: UIButton) {
+    @objc func editProfile(_ sender: UIButton) {
         do {
             
             /**
@@ -178,7 +188,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    @IBAction func refreshToken(_ sender: UIButton) {
+    @objc func refreshToken(_ sender: UIButton) {
         
         do {
             /**
@@ -267,7 +277,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
         }
     }
     
-    @IBAction func callApi(_ sender: UIButton) {
+    @objc func callGraphAPI(_ sender: UIButton) {
         guard let accessToken = self.accessToken else {
             self.updateLoggingText(text: "Operation failed because could not find an access token!")
             return
@@ -299,7 +309,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
             }.resume()
     }
     
-    @IBAction func signoutButton(_ sender: UIButton) {
+    @objc func signoutButton(_ sender: UIButton) {
         do {
             /**
              Removes all tokens from the cache for this application for the provided account
@@ -315,8 +325,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                 self.updateLoggingText(text: "There is no account to signing out!")
             }
             
-            self.signoutButton.isEnabled = false
-            self.callGraphApiButton.isEnabled = false
+            self.signOutButton.isEnabled = false
+            self.callGraphButton.isEnabled = false
             self.editProfileButton.isEnabled = false
             self.refreshTokenButton.isEnabled = false
             
@@ -335,8 +345,8 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     override func viewWillAppear(_ animated: Bool) {
         
         if self.accessToken == nil {
-            signoutButton.isEnabled = false
-            callGraphApiButton.isEnabled = false
+            signOutButton.isEnabled = false
+            callGraphButton.isEnabled = false
             editProfileButton.isEnabled = false
             refreshTokenButton.isEnabled = false
         }
@@ -382,3 +392,107 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
     }
 }
 
+
+
+// Yoel: UI Helpers
+extension ViewController {
+    
+    func initUI() {
+        
+        usernameLabel = UILabel()
+        usernameLabel.translatesAutoresizingMaskIntoConstraints = false
+        usernameLabel.text = ""
+        usernameLabel.textColor = .darkGray
+        usernameLabel.textAlignment = .right
+        
+        self.view.addSubview(usernameLabel)
+        
+        usernameLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 50.0).isActive = true
+        usernameLabel.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10.0).isActive = true
+        usernameLabel.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        usernameLabel.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        
+        // Add authorizationButton button
+        authorizationButton  = UIButton()
+        authorizationButton.translatesAutoresizingMaskIntoConstraints = false
+        authorizationButton.setTitle("Sign In", for: .normal)
+        authorizationButton.setTitleColor(.blue, for: .normal)
+        authorizationButton.addTarget(self, action: #selector(authorizationButton(_:)), for: .touchUpInside)
+        
+        self.view.addSubview(authorizationButton)
+        
+        authorizationButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        authorizationButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 80.0).isActive = true
+        authorizationButton.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        authorizationButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        
+        // Add call Graph button
+        callGraphButton  = UIButton()
+        callGraphButton.translatesAutoresizingMaskIntoConstraints = false
+        callGraphButton.setTitle("Call a Graph API", for: .normal)
+        callGraphButton.setTitleColor(.blue, for: .normal)
+        callGraphButton.setTitleColor(.gray, for: .disabled)
+        callGraphButton.addTarget(self, action: #selector(callGraphAPI(_:)), for: .touchUpInside)
+        self.view.addSubview(callGraphButton)
+        
+        callGraphButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        callGraphButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 120.0).isActive = true
+        callGraphButton.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        callGraphButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        
+        // Add sign out button
+        signOutButton = UIButton()
+        signOutButton.translatesAutoresizingMaskIntoConstraints = false
+        signOutButton.setTitle("Sign Out", for: .normal)
+        signOutButton.setTitleColor(.blue, for: .normal)
+        signOutButton.setTitleColor(.gray, for: .disabled)
+        signOutButton.addTarget(self, action: #selector(signoutButton(_:)), for: .touchUpInside)
+        self.view.addSubview(signOutButton)
+        
+        signOutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        signOutButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 160.0).isActive = true
+        signOutButton.widthAnchor.constraint(equalToConstant: 150.0).isActive = true
+        signOutButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+                
+        
+        // Add refreshTokenButton button
+        refreshTokenButton  = UIButton()
+        refreshTokenButton.translatesAutoresizingMaskIntoConstraints = false
+        refreshTokenButton.setTitle("Refrsh token", for: .normal)
+        refreshTokenButton.setTitleColor(.blue, for: .normal)
+        refreshTokenButton.setTitleColor(.gray, for: .disabled)
+        refreshTokenButton.addTarget(self, action: #selector(refreshToken(_:)), for: .touchUpInside)
+        self.view.addSubview(refreshTokenButton)
+        
+        refreshTokenButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        refreshTokenButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 200.0).isActive = true
+        refreshTokenButton.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        refreshTokenButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        
+        // Add editProfileButton button
+        editProfileButton  = UIButton()
+        editProfileButton.translatesAutoresizingMaskIntoConstraints = false
+        editProfileButton.setTitle("Edit profile", for: .normal)
+        editProfileButton.setTitleColor(.blue, for: .normal)
+        editProfileButton.setTitleColor(.gray, for: .disabled)
+        editProfileButton.addTarget(self, action: #selector(editProfile(_:)), for: .touchUpInside)
+        self.view.addSubview(editProfileButton)
+        
+        editProfileButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        editProfileButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 240.0).isActive = true
+        editProfileButton.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
+        editProfileButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true
+        
+        // Add logging textfield
+        loggingText = UITextView()
+        loggingText.isUserInteractionEnabled = false
+        loggingText.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(loggingText)
+        
+        loggingText.topAnchor.constraint(equalTo: editProfileButton.bottomAnchor, constant: 10.0).isActive = true
+        loggingText.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 10.0).isActive = true
+        loggingText.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -10.0).isActive = true
+        loggingText.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 10.0).isActive = true
+    }
+}

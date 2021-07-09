@@ -1,0 +1,7 @@
+use_frameworks!
+
+platform :ios, '11.0'
+ 
+target 'MSALiOS' do
+  pod 'MSAL'
+end
