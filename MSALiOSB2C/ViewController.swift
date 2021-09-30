@@ -111,7 +111,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              flow completes, or encounters an error.
              */
             
-            let webViewParameters = MSALWebviewParameters(parentViewController: self)
+            let webViewParameters = MSALWebviewParameters(authPresentationViewController: self)
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
             parameters.promptType = .selectAccount
             parameters.authority = authority
@@ -161,7 +161,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
              */
             
             let thisAccount = try self.getAccountByPolicy(withAccounts: application.allAccounts(), policy: kEditProfilePolicy)
-            let webViewParameters = MSALWebviewParameters(parentViewController: self)
+            let webViewParameters = MSALWebviewParameters(authPresentationViewController: self)
             let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
             parameters.authority = authority
             parameters.account = thisAccount
@@ -230,7 +230,7 @@ class ViewController: UIViewController, UITextFieldDelegate, URLSessionDelegate 
                             // Notice we supply the account here. This ensures we acquire token for the same account
                             // as we originally authenticated.
                             
-                            let webviewParameters = MSALWebviewParameters(parentViewController: self)
+                            let webviewParameters = MSALWebviewParameters(authPresentationViewController: self)
                             let parameters = MSALInteractiveTokenParameters(scopes: self.kScopes, webviewParameters: webviewParameters)
                             parameters.account = thisAccount
                             

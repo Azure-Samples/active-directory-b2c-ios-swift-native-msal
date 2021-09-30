@@ -31,7 +31,7 @@ do {
 	let application = try MSALPublicClientApplication(configuration: pcaConfig)
             
 	let viewController = self /*replace with your main presentation controller here */
-	let webViewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let webViewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
 	let interactiveParameters = MSALInteractiveTokenParameters(scopes: ["<enter-your-scope-here>"], webviewParameters: webViewParameters)
             
 	application.acquireToken(with: interactiveParameters) { (result, error) in
@@ -59,30 +59,15 @@ You will need to have a B2C client application registered with Microsoft. Follow
 
 ## Installation
 
-We use [Carthage](https://github.com/Carthage/Carthage) for package management during the preview period of MSAL. This package manager integrates very nicely with XCode while maintaining our ability to make changes to the library. The sample is set up to use Carthage.
+Load the podfile using cocoapods. This will create a new XCode Workspace you will load.
 
-##### If you're building for iOS, tvOS, or watchOS
+From terminal navigate to the directory where the podfile is located
 
-1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
-1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
-1. Run `carthage bootstrap --platform iOS`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
-1. On your application targets’ “General” settings tab, in the “Linked Frameworks and Libraries” section, drag and drop the `MSAL.framework` from the `Carthage/Build` folder on disk.
-1. On your application targets’ “Build Phases” settings tab, click the “+” icon and choose “New Run Script Phase”. Create a Run Script in which you specify your shell (ex: `/bin/sh`), add the following contents to the script area below the shell:
-
-  ```sh
-  /usr/local/bin/carthage copy-frameworks
-  ```
-
-  and add the paths to the frameworks you want to use under “Input Files”, e.g.:
-
-  ```
-  $(SRCROOT)/Carthage/Build/iOS/MSAL.framework
-  ```
-  This script works around an [App Store submission bug](http://www.openradar.me/radar?id=6409498411401216) triggered by universal binaries and ensures that necessary bitcode-related files and dSYMs are copied when archiving.
-
-With the debug information copied into the built products directory, Xcode will be able to symbolicate the stack trace whenever you stop at a breakpoint. This will also enable you to step through third-party code in the debugger.
-
-When archiving your application for submission to the App Store or TestFlight, Xcode will also copy these files into the dSYMs subdirectory of your application’s `.xcarchive` bundle.
+```
+$ pod install
+...
+$ open MSALiOSB2C.xcworkspace
+```
 
 ## Configure your application
 
@@ -108,12 +93,14 @@ When archiving your application for submission to the App Store or TestFlight, X
 In the `ViewControler.swift` file, update the variables at the top of this file with the information for your tenant.
 
 ```swift
-    let kTenantName = "<tenant>.onmicrosoft.com" // Your tenant name
-    let kClientID = "<your-client-id>" // Your client ID from the portal when you created your application
-    let kSignupOrSigninPolicy = "<your-signin-policy>" // Your signup and sign-in policy you created in the portal
-    let kEditProfilePolicy = "<your-edit-profile-policy>" // Your edit policy you created in the portal
-    let kGraphURI = "<Your backend API>" // This is your backend API that you've configured to accept your app's tokens
-    let kScopes: [String] = ["<Your backend API>/demo.read"] // This is a scope that you've configured your backend API to look for.
+    let kTenantName = "fabrikamb2c.onmicrosoft.com" // Your tenant name
+    let kAuthorityHostName = "fabrikamb2c.b2clogin.com" // Your authority host name
+    let kClientID = "90c0fe63-bcf2-44d5-8fb7-b8bbc0b29dc6" // Your client ID from the portal when you created your application
+    let kSignupOrSigninPolicy = "b2c_1_susi" // Your signup and sign-in policy you created in the portal
+    let kEditProfilePolicy = "b2c_1_edit_profile" // Your edit policy you created in the portal
+    let kResetPasswordPolicy = "b2c_1_reset" // Your reset password policy you created in the portal
+    let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
+    let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
 ```
 
 

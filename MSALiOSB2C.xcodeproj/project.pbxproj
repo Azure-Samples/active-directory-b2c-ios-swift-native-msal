@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		41C6CB0C8B4960084421C789 /* Pods_MSALiOSB2C.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9342F700D2B4746D5CEEA6 /* Pods_MSALiOSB2C.framework */; };
+		942B869215457C62F0DDC249 /* Pods_MSALiOSB2C_MSALiOSB2CUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0500F53C0CA552BB0F226F4 /* Pods_MSALiOSB2C_MSALiOSB2CUITests.framework */; };
+		C937AD4C62B6258342A142A4 /* Pods_MSALiOSB2CTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51A603AFEDEE86C7BB178DF5 /* Pods_MSALiOSB2CTests.framework */; };
 		FB2510581EBBE8030044F3F7 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB2510571EBBE8030044F3F7 /* MSAL.framework */; };
 		FB7630D11EB7EF8700D2A969 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7630D01EB7EF8700D2A969 /* AppDelegate.swift */; };
 		FB7630D31EB7EF8700D2A969 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7630D21EB7EF8700D2A969 /* ViewController.swift */; };
@@ -33,6 +36,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		146F3234213D2738F8B8D91B /* Pods-MSALiOSB2CTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2CTests.debug.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2CTests/Pods-MSALiOSB2CTests.debug.xcconfig"; sourceTree = "<group>"; };
+		1D37610600308654FAD8960F /* Pods-MSALiOSB2C-MSALiOSB2CUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2C-MSALiOSB2CUITests.release.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2C-MSALiOSB2CUITests/Pods-MSALiOSB2C-MSALiOSB2CUITests.release.xcconfig"; sourceTree = "<group>"; };
+		2C8F0FF4F115A238BE411186 /* Pods-MSALiOSB2C.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2C.release.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2C/Pods-MSALiOSB2C.release.xcconfig"; sourceTree = "<group>"; };
+		3FB17B5AA3366F90EF1E5FF9 /* Pods-MSALiOSB2C.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2C.debug.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2C/Pods-MSALiOSB2C.debug.xcconfig"; sourceTree = "<group>"; };
+		51A603AFEDEE86C7BB178DF5 /* Pods_MSALiOSB2CTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSALiOSB2CTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A70C9DB2C38528B0196142E /* Pods-MSALiOSB2C-MSALiOSB2CUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2C-MSALiOSB2CUITests.debug.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2C-MSALiOSB2CUITests/Pods-MSALiOSB2C-MSALiOSB2CUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		8A2168D20B2BC4D080A49E53 /* Pods-MSALiOSB2CTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MSALiOSB2CTests.release.xcconfig"; path = "Target Support Files/Pods-MSALiOSB2CTests/Pods-MSALiOSB2CTests.release.xcconfig"; sourceTree = "<group>"; };
+		9E9342F700D2B4746D5CEEA6 /* Pods_MSALiOSB2C.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSALiOSB2C.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0500F53C0CA552BB0F226F4 /* Pods_MSALiOSB2C_MSALiOSB2CUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MSALiOSB2C_MSALiOSB2CUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB2510571EBBE8030044F3F7 /* MSAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MSAL.framework; path = Carthage/Build/iOS/MSAL.framework; sourceTree = "<group>"; };
 		FB7368BE1EB94C8100FB407E /* MSALiOSB2C.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = MSALiOSB2C.xcodeproj; sourceTree = "<group>"; };
 		FB7630CD1EB7EF8700D2A969 /* MSALiOSB2C.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALiOSB2C.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,6 +65,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB2510581EBBE8030044F3F7 /* MSAL.framework in Frameworks */,
+				41C6CB0C8B4960084421C789 /* Pods_MSALiOSB2C.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C937AD4C62B6258342A142A4 /* Pods_MSALiOSB2CTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,14 +81,31 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				942B869215457C62F0DDC249 /* Pods_MSALiOSB2C_MSALiOSB2CUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D6CE424223CC460CA457D3D4 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				3FB17B5AA3366F90EF1E5FF9 /* Pods-MSALiOSB2C.debug.xcconfig */,
+				2C8F0FF4F115A238BE411186 /* Pods-MSALiOSB2C.release.xcconfig */,
+				6A70C9DB2C38528B0196142E /* Pods-MSALiOSB2C-MSALiOSB2CUITests.debug.xcconfig */,
+				1D37610600308654FAD8960F /* Pods-MSALiOSB2C-MSALiOSB2CUITests.release.xcconfig */,
+				146F3234213D2738F8B8D91B /* Pods-MSALiOSB2CTests.debug.xcconfig */,
+				8A2168D20B2BC4D080A49E53 /* Pods-MSALiOSB2CTests.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		FB25105E1EBCF9320044F3F7 /* Products */ = {
 			isa = PBXGroup;
+			children = (
+			);
 			name = Products;
 			sourceTree = "<group>";
 		};
@@ -85,6 +116,7 @@
 				FB7630CF1EB7EF8700D2A969 /* MSALiOSB2C */,
 				FB7630CE1EB7EF8700D2A969 /* Products */,
 				FB7630FE1EB7EFDA00D2A969 /* Frameworks */,
+				D6CE424223CC460CA457D3D4 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,6 +148,9 @@
 			isa = PBXGroup;
 			children = (
 				FB2510571EBBE8030044F3F7 /* MSAL.framework */,
+				9E9342F700D2B4746D5CEEA6 /* Pods_MSALiOSB2C.framework */,
+				D0500F53C0CA552BB0F226F4 /* Pods_MSALiOSB2C_MSALiOSB2CUITests.framework */,
+				51A603AFEDEE86C7BB178DF5 /* Pods_MSALiOSB2CTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -127,10 +162,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB7630F51EB7EF8700D2A969 /* Build configuration list for PBXNativeTarget "MSALiOSB2C" */;
 			buildPhases = (
+				2841944EAE5B35BAA4A4FD2F /* [CP] Check Pods Manifest.lock */,
 				FB7630C91EB7EF8700D2A969 /* Sources */,
 				FB7630CA1EB7EF8700D2A969 /* Frameworks */,
 				FB7630CB1EB7EF8700D2A969 /* Resources */,
-				FB2510591EBBE8180044F3F7 /* ShellScript */,
+				685D37BEF83BC58F5B3D6C65 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -145,6 +181,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB7630F81EB7EF8700D2A969 /* Build configuration list for PBXNativeTarget "MSALiOSB2CTests" */;
 			buildPhases = (
+				EA3A9A3F80476B65A17D752F /* [CP] Check Pods Manifest.lock */,
 				FB7630DD1EB7EF8700D2A969 /* Sources */,
 				FB7630DE1EB7EF8700D2A969 /* Frameworks */,
 				FB7630DF1EB7EF8700D2A969 /* Resources */,
@@ -163,9 +200,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB7630FB1EB7EF8700D2A969 /* Build configuration list for PBXNativeTarget "MSALiOSB2CUITests" */;
 			buildPhases = (
+				828AB71AB42DC764EDBFCB06 /* [CP] Check Pods Manifest.lock */,
 				FB7630E81EB7EF8700D2A969 /* Sources */,
 				FB7630E91EB7EF8700D2A969 /* Frameworks */,
 				FB7630EA1EB7EF8700D2A969 /* Resources */,
+				89E539BDEA9CD350112A0EE0 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -216,6 +255,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -265,19 +305,107 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		FB2510591EBBE8180044F3F7 /* ShellScript */ = {
+		2841944EAE5B35BAA4A4FD2F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSALiOSB2C-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		685D37BEF83BC58F5B3D6C65 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/MSAL.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-MSALiOSB2C/Pods-MSALiOSB2C-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework",
 			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSAL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MSALiOSB2C/Pods-MSALiOSB2C-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		828AB71AB42DC764EDBFCB06 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSALiOSB2C-MSALiOSB2CUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		89E539BDEA9CD350112A0EE0 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MSALiOSB2C-MSALiOSB2CUITests/Pods-MSALiOSB2C-MSALiOSB2CUITests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSAL.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MSALiOSB2C-MSALiOSB2CUITests/Pods-MSALiOSB2C-MSALiOSB2CUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EA3A9A3F80476B65A17D752F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MSALiOSB2CTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -437,11 +565,12 @@
 		};
 		FB7630F61EB7EF8700D2A969 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3FB17B5AA3366F90EF1E5FF9 /* Pods-MSALiOSB2C.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MSALiOSB2C/MSALiOSB2C.entitlements;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/iOS";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = MSALiOSB2C/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.identity.client.sample.MSALiOSB2C;
@@ -452,11 +581,12 @@
 		};
 		FB7630F71EB7EF8700D2A969 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C8F0FF4F115A238BE411186 /* Pods-MSALiOSB2C.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MSALiOSB2C/MSALiOSB2C.entitlements;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/iOS";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = MSALiOSB2C/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.identity.client.sample.MSALiOSB2C;
@@ -467,6 +597,7 @@
 		};
 		FB7630F91EB7EF8700D2A969 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 146F3234213D2738F8B8D91B /* Pods-MSALiOSB2CTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -482,6 +613,7 @@
 		};
 		FB7630FA1EB7EF8700D2A969 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A2168D20B2BC4D080A49E53 /* Pods-MSALiOSB2CTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -497,6 +629,7 @@
 		};
 		FB7630FC1EB7EF8700D2A969 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A70C9DB2C38528B0196142E /* Pods-MSALiOSB2C-MSALiOSB2CUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = UBF8T346G9;
@@ -511,6 +644,7 @@
 		};
 		FB7630FD1EB7EF8700D2A969 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1D37610600308654FAD8960F /* Pods-MSALiOSB2C-MSALiOSB2CUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = UBF8T346G9;
