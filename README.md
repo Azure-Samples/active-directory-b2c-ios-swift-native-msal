@@ -68,7 +68,7 @@ $ pod install
 ...
 $ open MSALiOSB2C.xcworkspace
 ```
-:warning: **Note:** If using an ARM-based Mac (M1/M2) then `pod install` needs to be run in a Rosetta terminal window. [More information.](https://osxdaily.com/2020/11/18/how-run-homebrew-x86-terminal-apple-silicon-mac/) 
+:warning: **Note:** If using an ARM-based Mac (M1/M2) then `pod install` needs to be run in a Rosetta terminal window. For more information follow [the instructions here.](https://osxdaily.com/2020/11/18/how-run-homebrew-x86-terminal-apple-silicon-mac/) 
 
 ## Configure your application
 
