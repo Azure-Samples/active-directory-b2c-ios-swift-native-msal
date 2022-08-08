@@ -103,10 +103,11 @@ In the `ViewControler.swift` file, update the variables at the top of this file 
     let kGraphURI = "https://fabrikamb2chello.azurewebsites.net/hello" // This is your backend API that you've configured to accept your app's tokens
     let kScopes: [String] = ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"] // This is a scope that you've configured your backend API to look for.
 ```
-
-
-
-
+> [!NOTE]
+>developers using the [Azure China Environment](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud), MUST use <your-tenant-name>.b2clogin.cn) authority, instead of `login.chinacloudapi.cn`.
+>
+> In order to use <your-tenant-name>.b2clogin.*, you will need to `setValidateAuthority(false)`. Learn more about using [b2clogin](https://docs.microsoft.com/en-us/azure/active-directory-b2c/b2clogin).
+    
 ## Community Help and Support
 
 We use Stack Overflow to provide support using [tag MSAL](http://stackoverflow.com/questions/tagged/msal) and [tag azure-ad-b2c](http://stackoverflow.com/questions/tagged/azure-ad-b2c). We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
